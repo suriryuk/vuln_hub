@@ -4,27 +4,21 @@ import pymysql
 from pymysql.err import OperationalError
 from contextlib import asynccontextmanager
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print('Database Connect...')
+from db.session import db_engine
+from db.base import Base
+from routers import auth
 
-    try:
-        conn = pymysql.connect(host='vuln_db', user='user', password='password', db='vuln', charset='utf8')
+def create_table():
+    Base.metadata.create_all(bind=db_engine)
 
-        if conn:
-            cur = conn.cursor()
-        else:
-            print('Database Connection Failed..')
-            exit(-1)
-    except OperationalError:
-        print('Can\'t connect to MySQL server')
+def get_application():
+    app = FastAPI()
+    create_table()
+    return app
 
-    yield # yield를 기준으로 위에가 app 실행 때 실행할 명령, 아래가 종료후 실행할 명령
+app = get_application()
 
-    print('Resource Clear..')
-    conn.close()
-
-app = FastAPI(lifespan=lifespan)
+app.include_router(auth.router)
 
 @app.get('/')
 def root():
