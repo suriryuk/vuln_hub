@@ -1,40 +1,67 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import Session
 from hashlib import sha256
 
 from db.models.user import User
 from db.session import get_db
+from utils.models.login import LoginInfo
+from utils.models.register import RegisterInfo
+
+templates = Jinja2Templates(directory='templates')
 
 router = APIRouter(
     prefix='/auth',
     tags=['auth']
 )
 
-@router.get('/login')
-def login():
-    return 'login page'
+@router.get('/login', response_class=HTMLResponse)
+def login(request: Request):
+    return templates.TemplateResponse(
+        "login.html",
+        {'request': request, 'error': ''}
+    )
 
 @router.post('/login')
-def login_db(userid: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.userid == userid and User.password == sha256(password.encode()).hexdigest()).first()
+def login_db(userinfo: LoginInfo, db: Session = Depends(get_db)):
+    # user 조회 쿼리
+    user = db.query(User).filter(User.userid == userinfo.userid and User.password == sha256(userinfo.password.encode()).hexdigest()).first()
     if user is not None:
         return user
     raise HTTPException(status_code=400, detail='User Not Exist')
 
-@router.get('/register')
-def register():
-    return 'register page'
+@router.get('/register', response_class=HTMLResponse)
+def register(request: Request):
+    return templates.TemplateResponse(
+        "register.html",
+        {'request': request, 'error': ''}
+    )
 
 @router.post('/register')
-def register_db(userid: str, password: str, nickname: str, db: Session = Depends(get_db)):
-    stmt = (
-        insert(User).values(userid=userid, password=sha256(password.encode()).hexdigest(), nickname=nickname)
-    )
-    result = db.execute(stmt)
-    db.commit()
-
-    if result.rowcount == 0:
+def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
+    # user 조회 쿼리 ( 중복 사용자 생성 방지 )
+    user = db.query(User).filter(User.userid == userinfo.userid and User.password == sha256(userinfo.password.encode()).hexdigest()).first()
+    if user:
         raise HTTPException(status_code=400, detail='User already exist')
+    
+    stmt = (
+        insert(User).values(userid=userinfo.userid, password=sha256(userinfo.password.encode()).hexdigest(), nickname=userinfo.nickname)
+    )
+
+    try:
+        result = db.execute(stmt)
+        db.commit()
+
+        if result.rowcount == 0:
+            raise HTTPException(status_code=400, detail='User already exist')
+    except Exception as e:
+        db.rollback()
+        print(e)
+        raise HTTPException(
+            status_code=500,
+            detail='Internal Server Error'
+        )
     
     return {'message': 'user create successfully'}

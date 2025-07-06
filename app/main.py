@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 import pymysql
 from pymysql.err import OperationalError
@@ -19,6 +20,7 @@ def get_application():
 app = get_application()
 
 app.include_router(auth.router)
+app.mount('/assets', StaticFiles(directory='static'))
 
 @app.get('/')
 def root():
