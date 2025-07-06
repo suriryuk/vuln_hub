@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Form
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.dialects.mysql import insert
@@ -41,6 +41,10 @@ def register(request: Request):
 
 @router.post('/register')
 def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
+    # 비밀번호와 확인용 비밀번호 일치 여부 검사
+    if userinfo.password != userinfo.confirmPassword:
+        raise HTTPException(status_code=400, detail='The password and confirmation password do not match.')
+    
     # user 조회 쿼리 ( 중복 사용자 생성 방지 )
     user = db.query(User).filter(User.userid == userinfo.userid and User.password == sha256(userinfo.password.encode()).hexdigest()).first()
     if user:

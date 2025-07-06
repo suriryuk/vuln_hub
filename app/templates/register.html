@@ -50,7 +50,7 @@
             const nickname = document.getElementById('nickname').value.trim();
     
             // 유효성 검사
-            if (!userid || !password || !nickname) {
+            if (!userid || !password || !nickname || !confirmPassword) {
                 displayMessage('모든 필드를 입력해주세요.', 'error');
                 return;
             }
@@ -67,7 +67,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userid, password, nickname }),
+                    body: JSON.stringify({ userid, password, nickname, confirmPassword }),
                 });
     
                 const result = await response.json(); // 서버 응답 처리
