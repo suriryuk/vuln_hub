@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.dialects.mysql import insert
@@ -9,6 +9,7 @@ from db.models.user import User
 from db.session import get_db
 from utils.models.login import LoginInfo
 from utils.models.register import RegisterInfo
+from utils.jwt_auth import create_access_token
 
 templates = Jinja2Templates(directory='templates')
 
@@ -25,11 +26,26 @@ def login(request: Request):
     )
 
 @router.post('/login')
-def login_db(userinfo: LoginInfo, db: Session = Depends(get_db)):
+def login_db(userinfo: LoginInfo, response: Response, db: Session = Depends(get_db)):
     # user 조회 쿼리
     user = db.query(User).filter(User.userid == userinfo.userid and User.password == sha256(userinfo.password.encode()).hexdigest()).first()
+
     if user is not None:
-        return user
+        # JWT 토큰 생성
+        token = create_access_token({'sub': userinfo.userid})
+
+        # 쿠키 설정
+        response.set_cookie(
+            key='UserToken',
+            value=token,
+            httponly=True,
+            secure=True,
+            samesite='lax',
+            path='/'
+        )
+
+        return {'message': 'login success <a href="/">메인으로 가기</a>'}
+    
     raise HTTPException(status_code=400, detail='User Not Exist')
 
 @router.get('/register', response_class=HTMLResponse)
@@ -51,7 +67,7 @@ def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail='User already exist')
     
     stmt = (
-        insert(User).values(userid=userinfo.userid, password=sha256(userinfo.password.encode()).hexdigest(), nickname=userinfo.nickname)
+        insert(User).values(userid=userinfo.userid, password=sha256(userinfo.password.encode()).hexdigest(), nickname=userinfo.nickname, score=0)
     )
 
     try:
@@ -69,3 +85,11 @@ def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
         )
     
     return {'message': 'user create successfully'}
+
+@router.get('/logout', response_class=HTMLResponse)
+def logout(response: Response):
+    response.delete_cookie(
+        key='UserToken'
+    )
+
+    return '<script>alert("logout success"); location.href="/auth/login"</script>'

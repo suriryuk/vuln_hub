@@ -9,3 +9,4 @@ class User(Base):
     registerDate = Column(DateTime(), server_default=func.now())
     updateDate = Column(DateTime(), server_default=func.now())
     nickname = Column(String(255), unique=True, nullable=False)
+    score = Column(Integer, default=0, nullable=False)
