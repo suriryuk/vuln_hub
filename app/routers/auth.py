@@ -22,7 +22,7 @@ router = APIRouter(
 def login(request: Request):
     return templates.TemplateResponse(
         "login.html",
-        {'request': request, 'error': ''}
+        {'request': request}
     )
 
 @router.post('/login')
@@ -52,7 +52,7 @@ def login_db(userinfo: LoginInfo, response: Response, db: Session = Depends(get_
 def register(request: Request):
     return templates.TemplateResponse(
         "register.html",
-        {'request': request, 'error': ''}
+        {'request': request}
     )
 
 @router.post('/register')
@@ -67,7 +67,7 @@ def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail='User already exist')
     
     stmt = (
-        insert(User).values(userid=userinfo.userid, password=sha256(userinfo.password.encode()).hexdigest(), nickname=userinfo.nickname, score=0)
+        insert(User).values(userid=userinfo.userid, password=sha256(userinfo.password.encode()).hexdigest(), nickname=userinfo.nickname, score=0, admin=False)
     )
 
     try:

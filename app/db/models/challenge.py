@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.sql import func
 from ..base_class import Base
 
@@ -7,3 +7,4 @@ class Challenge(Base):
     challName = Column(String(255), nullable=False, unique=True)
     challScore = Column(Integer, nullable=False)
     category = Column(String(255), nullable=False)
+    challExplain = Column(Text(), nullable=False)

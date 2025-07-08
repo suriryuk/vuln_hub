@@ -1,7 +1,11 @@
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional
 import os
+
+from db.models.user import User
 
 SECRET_KEY = os.getenv('JWT_SECRET_KEY')
 ALGORITHM = 'HS256'
@@ -35,3 +39,30 @@ def get_current_user(token: str):
         return None
 
     return userid
+
+# 로그인 여부 검사
+def user_login(UserToken: str):
+    if not UserToken:
+        # return '<script>alert("Missing UserToken in cookies."); location.href="/auth/login"</script>'
+        raise HTTPException(
+            status_code=302,
+            headers={'Location': '/auth/login'}
+        )
+
+    current_user = get_current_user(UserToken)
+    if current_user is None:
+        # return '<script>alert("Invalid authentication token."); location.href="/auth/login"</script>'
+        raise HTTPException(
+            status_code=302,
+            headers={'Location': '/auth/login'}
+        )
+
+    return current_user
+
+# admin 여부 검사
+def is_admin(UserToken: str, db: Session):
+    current_user = get_current_user(UserToken)
+
+    admin = db.query(User.admin).filter(User.userid == current_user).scalar()
+    
+    return admin

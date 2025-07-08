@@ -15,12 +15,16 @@
         </div>
         <nav class="main-nav-left">
             <a href="/">home</a>
-            <a href="#">challenge</a>
-            <a href="#">설정</a>
-            <a href="#">도움말</a>
+            <a href="/challenge">challenge</a>
+            <a href="#">menu2</a>
+            <a href="#">menu3</a>
         </nav>
         <nav class="main-nav-right">
+            {% if admin %}
+            <a href="/admin" class="profile-link">{{ user_id }}</a>
+            {% else %}
             <a href="#" class="profile-link">{{ user_id }}</a>
+            {% endif %}
             <a href="/auth/logout" class="logout-link">Logout</a>
         </nav>
     </header>

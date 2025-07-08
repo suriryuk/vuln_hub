@@ -11,8 +11,8 @@ import datetime
 
 from db.session import db_engine, get_db
 from db.base import Base, Challenge, UserChallenge, User
-from routers import auth
-from utils.jwt_auth import get_current_user
+from routers import auth, challenge, admin
+from utils.jwt_auth import user_login, is_admin
 from utils.userinfo import get_userinfo
 
 def create_table():
@@ -28,22 +28,18 @@ templates = Jinja2Templates(directory='templates')
 
 app = get_application()
 
-# 로그인/회원가입 경로 추가
+# router 추가
 app.include_router(auth.router)
+app.include_router(challenge.router)
+app.include_router(admin.router)
 
 # CSS, Javascript 파일 경로 적용
 app.mount('/assets', StaticFiles(directory='static'))
 
 @app.get('/', response_class=HTMLResponse)
 def root(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
-    if not UserToken:
-        return '<script>alert("Missing UserToken in cookies."); location.href="/auth/login"</script>'
-        # raise HTTPException(status_code=401, detail="Missing UserToken in cookies.")
-
-    current_user = get_current_user(UserToken)
-    if current_user is None:
-        return '<script>alert("Invalid authentication token."); location.href="/auth/login"</script>'
-        # raise HTTPException(status_code=401, detail="Invalid authentication token.")
+    current_user = user_login(UserToken)
+    admin = is_admin(UserToken, db)
 
     UserInfo = get_userinfo(current_user, db)
 
@@ -51,9 +47,9 @@ def root(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db
     return templates.TemplateResponse(
         "main.html",
         {
-            "request": request, 
-            "user_id": current_user, 
+            "request": request,
+            "user_id": current_user,
             "user_info": UserInfo,
-            "error": ""
+            "admin": admin
         }
     )

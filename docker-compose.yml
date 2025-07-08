@@ -1,7 +1,8 @@
 version: '3'
 services:
   db:
-    image: mysql:latest
+    # image: mysql:latest
+    build: ./mysql
     container_name: vuln_db
     ports:
       - "3306:3306"
@@ -10,6 +11,11 @@ services:
       TZ: "Asia/Seoul"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
     networks:
       - vuln_hub_internal
@@ -26,7 +32,8 @@ services:
     environment:
       TZ: "Asia/Seoul"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
     networks:
       - vuln_hub_external
