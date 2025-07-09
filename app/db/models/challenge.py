@@ -8,3 +8,4 @@ class Challenge(Base):
     challScore = Column(Integer, nullable=False)
     category = Column(String(255), nullable=False)
     challExplain = Column(Text(), nullable=False)
+    challAnswer = Column(String(255), nullable=False, unique=True)

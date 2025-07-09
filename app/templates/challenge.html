@@ -29,30 +29,144 @@
 
     <main class="main-content-problem-list">
         <section class="problem-list">
+            {% for row in challenges %}
             <article class="problem-item">
-                <div class="problem-info">
-                    <h4 class="problem-title">문제 이름 1</h4>
-                    <p class="problem-description">문제 설명이 여기에 들어갑니다. 문제에 대한 간단한 설명을 작성합니다.</p>
+                <div class="problem-info"
+                     data-problem-id="{{ row.id }}"
+                     data-problem-title="{{ row.challName }}"
+                     data-full-description="{{ row.challExplain }}"
+                     data-problem-score="{{ row.challScore }}"
+                     data-problem-category="{{ row.category }}"> <!-- 문제 카테고리 추가 -->
+                    <h4 class="problem-title">{{ row.challName }}</h4>
+                    <p class="problem-description">{{ row.challExplain | truncate(100, True, '...') }}</p>
                 </div>
-                <div class="problem-score">점수: 100</div>
+                <div class="problem-score">점수: {{ row.challScore }}</div>
             </article>
-
-            <article class="problem-item">
-                <div class="problem-info">
-                    <h4 class="problem-title">문제 이름 2</h4>
-                    <p class="problem-description">다른 문제 설명이 여기에 들어갑니다. 문제의 난이도나 특징을 간략히 적습니다.</p>
-                </div>
-                <div class="problem-score">점수: 80</div>
-            </article>
-
-            <article class="problem-item">
-                <div class="problem-info">
-                    <h4 class="problem-title">문제 이름 3</h4>
-                    <p class="problem-description">추가 문제 설명입니다. 문제에 대한 부가 정보를 넣을 수 있습니다.</p>
-                </div>
-                <div class="problem-score">점수: 60</div>
-            </article>
+            {% endfor %}
         </section>
+        <div class="problem-item-ghost"></div>
     </main>
+
+    <div id="problemModal" class="modal-overlay">
+        <div class="modal-content" data-current-problem-id="">
+            <button class="modal-close-button">&times;</button>
+            <h3 id="modalProblemTitle"></h3>
+            <div id="modalProblemCategory" class="modal-category-display"></div> 
+            <p id="modalProblemDescription"></p>
+    
+            <div class="modal-score-display">
+                <span class="score-label">점수:</span>
+                <span id="modalProblemScore" class="score-value"></span>
+            </div>
+    
+            <div class="modal-answer-section">
+                <label for="answerInput">정답 입력:</label>
+                <input type="text" id="answerInput" placeholder="여기에 정답을 입력하세요." /> 
+                <button id="submitAnswerButton" class="btn-primary">제출</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const problemListSection = document.querySelector('.problem-list');
+        const problemModal = document.getElementById('problemModal');
+        const modalCloseButton = problemModal.querySelector('.modal-close-button');
+        const modalProblemTitle = document.getElementById('modalProblemTitle');
+        const modalProblemCategory = document.getElementById('modalProblemCategory'); // 카테고리 표시 요소 추가
+        const modalProblemDescription = document.getElementById('modalProblemDescription');
+        const modalProblemScore = document.getElementById('modalProblemScore');
+        const answerInput = document.getElementById('answerInput');
+        const submitAnswerButton = document.getElementById('submitAnswerButton');
+
+        // 문제 아이템 클릭 이벤트 리스너 (이벤트 위임)
+        if (problemListSection) {
+            problemListSection.addEventListener('click', (event) => {
+                const problemItem = event.target.closest('.problem-item');
+                if (problemItem) {
+                    const problemInfo = problemItem.querySelector('.problem-info');
+                    if (problemInfo) {
+                        const problemId = problemInfo.dataset.problemId;
+                        const title = problemInfo.dataset.problemTitle;
+                        const fullDescription = problemInfo.dataset.fullDescription;
+                        const score = problemInfo.dataset.problemScore;
+                        const category = problemInfo.dataset.problemCategory; // 카테고리 가져오기
+
+                        // 모달에 내용 채우기
+                        modalProblemTitle.textContent = title;
+                        modalProblemCategory.textContent = `카테고리: ${category}`; // 카테고리 표시
+                        modalProblemDescription.textContent = fullDescription;
+                        modalProblemScore.textContent = score;
+
+                        // 모달 콘텐츠에 현재 문제 ID 저장 (제출 시 사용)
+                        problemModal.querySelector('.modal-content').dataset.currentProblemId = problemId;
+
+                        // 정답 입력 필드 초기화
+                        answerInput.value = '';
+
+                        // 모달 보이기
+                        problemModal.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // 모달 닫기 버튼 클릭 이벤트 리스너
+        modalCloseButton.addEventListener('click', () => {
+            problemModal.classList.remove('active');
+        });
+
+        // 모달 오버레이 외부 클릭 시 모달 닫기 이벤트 리스너
+        problemModal.addEventListener('click', (event) => {
+            if (event.target === problemModal) {
+                problemModal.classList.remove('active');
+            }
+        });
+
+        // 정답 제출 버튼 클릭 이벤트 리스너
+        submitAnswerButton.addEventListener('click', async () => {
+            const problemId = problemModal.querySelector('.modal-content').dataset.currentProblemId;
+            const userAnswer = answerInput.value.trim();
+
+            if (!userAnswer) {
+                alert('정답을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/submit-answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        problem_id: problemId,
+                        user_answer: userAnswer
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`제출 오류: ${response.status} - ${errorData.message || response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.correct) {
+                    alert(`정답입니다! ${result.message || ''}`);
+                } else {
+                    alert(`오답입니다. ${result.message || ''}`);
+                }
+
+                problemModal.classList.remove('active');
+                answerInput.value = '';
+
+            } catch (error) {
+                alert(`정답 제출 중 오류가 발생했습니다: ${error.message}`);
+                console.error('Submission Error:', error);
+            }
+        });
+    });
+    </script>
 </body>
 </html>

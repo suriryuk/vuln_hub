@@ -56,7 +56,7 @@ body {
 .admin-main-content {
     flex-grow: 1;
     padding: 30px 40px;
-    max-width: 1200px;
+    max-width: 1400px; /* 기존 1200px에서 1400px로 증가 (원하는 너비로 조절 가능) */
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -83,6 +83,67 @@ body {
     color: #64ffda;
     margin-bottom: 20px;
     font-size: 22px;
+}
+
+/* 문제 생성/수정 폼 섹션 헤더 */
+.problem-form-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; /* 헤더와 폼 내용 사이 간격 */
+}
+
+/* 폼 섹션 제목 마진 조정 */
+.problem-form-section h3 {
+    margin-bottom: 0; /* 기본 마진 제거 */
+}
+
+/* 토글 버튼 스타일 */
+.toggle-button {
+    background-color: transparent;
+    border: 1px solid #64ffda;
+    color: #64ffda;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* 아이콘과 텍스트 사이 간격 */
+}
+
+.toggle-button:hover {
+    background-color: #64ffda;
+    color: #000000;
+}
+
+.toggle-button .icon {
+    font-size: 1.2em; /* 아이콘 크기 조정 */
+    line-height: 1; /* 아이콘 수직 정렬 */
+}
+
+/* 폼 내용 (토글될 부분) */
+.problem-form-section .form-content {
+    max-height: 1000px; /* 폼 내용이 충분히 보일 수 있는 최대 높이 */
+    overflow: hidden; /* 내용이 넘치면 숨김 */
+    transition: max-height 0.5s ease-out, opacity 0.3s ease-out; /* 부드러운 전환 효과 */
+    opacity: 1;
+}
+
+/* 최소화 상태일 때 */
+.problem-form-section.minimized .form-content {
+    max-height: 0; /* 높이를 0으로 만들어 숨김 */
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    opacity: 0; /* 내용 투명도 0으로 만들어 페이드 아웃 */
+}
+
+/* 최소화 상태일 때 헤더 아래 마진 제거 */
+.problem-form-section.minimized .section-header {
+    margin-bottom: 0;
 }
 
 .form-row {
@@ -177,7 +238,8 @@ body {
     text-align: left;
     color: #cbd5e1;
     border-bottom: 1px solid #374151;
-    word-wrap: break-word;
+    word-wrap: break-word; /* 내용이 길면 자동으로 줄바꿈 */
+    word-break: break-all; /* 단어 중간에도 줄바꿈 허용 */
 }
 
 .problem-table th {
@@ -187,6 +249,36 @@ body {
 
 .problem-table td {
     vertical-align: middle;
+}
+
+/* 특정 컬럼의 너비를 지정하여 균형 조절 (선택 사항) */
+.problem-table th:nth-child(1), /* 문제 번호 */
+.problem-table td:nth-child(1) {
+    width: 8%;
+}
+.problem-table th:nth-child(2), /* 문제 이름 */
+.problem-table td:nth-child(2) {
+    width: 15%;
+}
+.problem-table th:nth-child(3), /* 문제 내용 */
+.problem-table td:nth-child(3) {
+    width: 25%;
+}
+.problem-table th:nth-child(4), /* 문제 점수 */
+.problem-table td:nth-child(4) {
+    width: 8%;
+}
+.problem-table th:nth-child(5), /* 문제 카테고리 */
+.problem-table td:nth-child(5) {
+    width: 12%;
+}
+.problem-table th:nth-child(6), /* 정답 */
+.problem-table td:nth-child(6) {
+    width: 15%;
+}
+.problem-table th:nth-child(7), /* 관리 */
+.problem-table td:nth-child(7) {
+    width: 17%;
 }
 
 .btn-edit {
@@ -202,6 +294,28 @@ body {
 
 .btn-edit:hover {
     background-color: #52e6c8;
+}
+
+/* 삭제 버튼 스타일 */
+.btn-delete {
+    background-color: #dc3545; /* 붉은색 계열 */
+    border: none;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 8px; /* 수정 버튼과의 간격 */
+}
+
+.btn-delete:hover {
+    background-color: #c82333; /* 호버 시 더 진한 붉은색 */
+}
+
+/* 테이블 셀 내 버튼들이 너무 붙지 않도록 간격 조정 */
+.problem-table td button {
+    white-space: nowrap; /* 버튼이 줄바꿈되지 않도록 */
 }
 
 #problemContent {

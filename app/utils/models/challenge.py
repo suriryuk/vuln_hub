@@ -7,3 +7,4 @@ class ChallengeInfo(BaseModel):
     problemContent: str
     problemScore: int
     problemCategory: str
+    problemAnswer: str

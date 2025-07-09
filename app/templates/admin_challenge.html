@@ -12,7 +12,7 @@
             <a href="#">Dashboard</a>
         </div>
         <nav class="main-nav-left">
-            <a href="#">home</a>
+            <a href="/">home</a>
             <a href="#">menu1</a>
             <a href="#">menu2</a>
             <a href="#">menu3</a>
@@ -31,34 +31,45 @@
         <h2 class="page-title">Challenges</h2>
 
         <!-- 문제 생성 폼 -->
-        <section class="problem-form-section">
-            <h3>문제 생성 / 수정</h3>
-            <form id="problemForm">
-                <div class="form-row">
-                    <label for="problemNumber">문제 번호</label>
-                    <input type="number" id="problemNumber" name="problemNumber" disabled />
-                </div>
-                <div class="form-row">
-                    <label for="problemName">문제 이름</label>
-                    <input type="text" id="problemName" name="problemName" required />
-                </div>
-                <div class="form-row">
-                    <label for="problemCategory">문제 카테고리</label>
-                    <input type="text" id="problemCategory" name="problemCategory" required />
-                </div>
-                <div class="form-row">
-                    <label for="problemContent">문제 내용</label>
-                    <textarea id="problemContent" name="problemContent" rows="4" required></textarea>
-                </div>
-                <div class="form-row">
-                    <label for="problemScore">문제 점수</label>
-                    <input type="number" id="problemScore" name="problemScore" required />
-                </div>
-                <div class="form-row form-actions">
-                    <button type="submit" class="btn-primary">저장</button>
-                    <button type="reset" class="btn-secondary">초기화</button>
-                </div>
-            </form>
+        <section class="problem-form-section" id="problemFormSection">
+            <div class="section-header">
+                <h3>문제 생성 / 수정</h3>
+                <button type="button" class="toggle-button" id="toggleProblemForm">
+                    <span class="icon">▲</span> <span class="text">폼 최소화</span>
+                </button>
+            </div>
+            <div class="form-content">
+                <form id="problemForm">
+                    <div class="form-row">
+                        <label for="problemNumber">문제 번호</label>
+                        <input type="number" id="problemNumber" name="problemNumber" disabled />
+                    </div>
+                    <div class="form-row">
+                        <label for="problemName">문제 이름</label>
+                        <input type="text" id="problemName" name="problemName" required />
+                    </div>
+                    <div class="form-row">
+                        <label for="problemCategory">문제 카테고리</label>
+                        <input type="text" id="problemCategory" name="problemCategory" required />
+                    </div>
+                    <div class="form-row">
+                        <label for="problemContent">문제 내용</label>
+                        <textarea id="problemContent" name="problemContent" rows="4" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label for="problemScore">문제 점수</label>
+                        <input type="number" id="problemScore" name="problemScore" required />
+                    </div>
+                    <div class="form-row">
+                        <label for="problemAnswer">정답</label>
+                        <input type="text" id="problemAnswer" name="problemAnswer" required />
+                    </div>
+                    <div class="form-row form-actions">
+                        <button type="submit" class="btn-primary">저장</button>
+                        <button type="reset" class="btn-secondary">초기화</button>
+                    </div>
+                </form>
+            </div>
         </section>
 
         <!-- 문제 목록 테이블 -->
@@ -70,74 +81,118 @@
                         <th>문제 이름</th>
                         <th>문제 내용</th>
                         <th>문제 점수</th>
-                        <th>문제 카테고리</th> <!-- 새로운 컬럼 추가 -->
-                        <th>수정</th>
+                        <th>문제 카테고리</th>
+                        <th>정답</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for row in challenges %}
                     <tr>
-                        <td>1</td>
-                        <td>문제 이름 1</td>
-                        <td>문제 내용 예시 1</td>
-                        <td>100</td>
-                        <td>웹 해킹</td> <!-- 카테고리 예시 -->
-                        <td><button class="btn-edit">수정</button></td>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.challName }}</td>
+                        <td>{{ row.challExplain }}</td>
+                        <td>{{ row.challScore }}</td>
+                        <td>{{ row.category }}</td>
+                        <td>{{ row.challAnswer }}</td>
+                        <td>
+                            <button class="btn-edit">수정</button>
+                            <button class="btn-delete">삭제</button>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>문제 이름 2</td>
-                        <td>문제 내용 예시 2</td>
-                        <td>80</td>
-                        <td>암호학</td> <!-- 카테고리 예시 -->
-                        <td><button class="btn-edit">수정</button></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>문제 이름 3</td>
-                        <td>문제 내용 예시 3</td>
-                        <td>60</td>
-                        <td>시스템 해킹</td> <!-- 카테고리 예시 -->
-                        <td><button class="btn-edit">수정</button></td>
-                    </tr>
-                    <!-- 추가 문제 행들 -->
+                    {% endfor %}
                 </tbody>
             </table>
         </section>
     </main>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        // 폼 섹션 및 토글 관련 요소들 추가
+        const problemFormSection = document.getElementById('problemFormSection');
+        const toggleProblemFormButton = document.getElementById('toggleProblemForm');
+        const toggleButtonIcon = toggleProblemFormButton.querySelector('.icon');
+        const toggleButtonText = toggleProblemFormButton.querySelector('.text');
+
+        // 기존 폼 요소들
         const problemForm = document.getElementById('problemForm');
         const problemNumberInput = document.getElementById('problemNumber');
         const problemNameInput = document.getElementById('problemName');
         const problemContentInput = document.getElementById('problemContent');
         const problemScoreInput = document.getElementById('problemScore');
-        const problemCategoryInput = document.getElementById('problemCategory')
+        const problemCategoryInput = document.getElementById('problemCategory');
+        const problemAnswerInput = document.getElementById('problemAnswer');
 
-        const problemTable = document.querySelector('.problem-table tbody');
+        // 기존 테이블 및 버튼 요소들
+        const problemTableBody = document.querySelector('.problem-table tbody'); // tbody 선택자로 변경
         const btnReset = problemForm.querySelector('button[type="reset"]');
 
+        // 폼 최소화/확장 버튼 클릭 이벤트 추가
+        toggleProblemFormButton.addEventListener('click', () => {
+            problemFormSection.classList.toggle('minimized'); // 'minimized' 클래스 토글
+
+            // 버튼 텍스트와 아이콘 변경
+            if (problemFormSection.classList.contains('minimized')) {
+                toggleButtonIcon.textContent = '▼'; // 아래 화살표
+                toggleButtonText.textContent = '폼 확장';
+            } else {
+                toggleButtonIcon.textContent = '▲'; // 위 화살표
+                toggleButtonText.textContent = '폼 최소화';
+            }
+        });
+
         // 수정 버튼 클릭 이벤트 위임
-        problemTable.addEventListener('click', (e) => {
+        problemTableBody.addEventListener('click', async (e) => {
+            // 수정 버튼 클릭 시
             if (e.target.classList.contains('btn-edit')) {
                 const row = e.target.closest('tr');
                 const cells = row.querySelectorAll('td');
 
-                // 문제 번호, 이름, 내용, 점수, 카테고리 가져오기
                 const number = cells[0].textContent.trim();
                 const name = cells[1].textContent.trim();
                 const content = cells[2].textContent.trim();
                 const score = cells[3].textContent.trim();
                 const category = cells[4].textContent.trim();
+                const answer = cells[5].textContent.trim();
 
-                // 폼에 값 채우기
                 problemNumberInput.value = number;
                 problemNameInput.value = name;
                 problemContentInput.value = content;
                 problemScoreInput.value = score;
                 problemCategoryInput.value = category;
+                problemAnswerInput.value = answer;
 
-                // 문제 번호는 항상 disabled 유지 (수정 불가)
                 problemNumberInput.disabled = true;
+                problemForm.querySelector('.btn-primary').textContent = '수정';
+
+                if (problemFormSection.classList.contains('minimized')) {
+                    problemFormSection.classList.remove('minimized');
+                    toggleButtonIcon.textContent = '▲';
+                    toggleButtonText.textContent = '폼 최소화';
+                }
+            }
+            // 삭제 버튼 클릭 시
+            else if (e.target.classList.contains('btn-delete')) {
+                const row = e.target.closest('tr');
+                const problemId = row.cells[0].textContent.trim(); // 문제 번호를 ID로 사용
+
+                if (confirm(`정말로 문제 번호 ${problemId}번을 삭제하시겠습니까?`)) {
+                    try {
+                        const response = await fetch(`/admin/challenge/delete/${problemId}`, {
+                            method: 'GET'
+                        });
+                        
+                        if (response.ok) {
+                            alert('문제가 성공적으로 삭제되었습니다.');
+                            location.reload(); // 페이지 새로고침
+                        } else {
+                            alert('삭제 중 오류가 발생했습니다.');
+                        }
+                    } catch (error) {
+                        alert(`삭제 중 오류가 발생했습니다: ${error.message}`);
+                        console.error('Error:', error);
+                    }
+                }
             }
         });
 
@@ -145,54 +200,62 @@
         btnReset.addEventListener('click', () => {
             problemNumberInput.value = '';
             problemNumberInput.disabled = true;
+            problemForm.querySelector('.btn-primary').textContent = '저장';
+            problemAnswerInput.value = ''; // 정답 필드도 초기화
         });
 
         document.getElementById('problemForm').addEventListener('submit', async function(event) {
-        event.preventDefault(); // 기본 폼 제출 막기
+            event.preventDefault(); // 기본 폼 제출 막기
 
-        // 폼 데이터 수집
-        const problemNumber = document.getElementById('problemNumber').value; // 수정 시에만 값 있음
-        const problemName = document.getElementById('problemName').value.trim();
-        const problemContent = document.getElementById('problemContent').value.trim();
-        const problemScore = Number(document.getElementById('problemScore').value);
-        const problemCategory = document.getElementById('problemCategory').value.trim();
+            // 폼 데이터 수집
+            const problemNumber = document.getElementById('problemNumber').value; // 수정 시에만 값 있음
+            const problemName = document.getElementById('problemName').value.trim();
+            const problemContent = document.getElementById('problemContent').value.trim();
+            const problemScore = Number(document.getElementById('problemScore').value);
+            const problemCategory = document.getElementById('problemCategory').value.trim();
+            const problemAnswer = document.getElementById('problemAnswer').value.trim();
 
-        // JSON 객체 생성
-        const data = {
-            // 문제 번호는 수정 시에만 포함, 새 문제 생성 시에는 제외 가능
-            ...(problemNumber && { problemNumber: Number(problemNumber) }),
-            problemName,
-            problemContent,
-            problemScore,
-            problemCategory
-        };
+            // JSON 객체 생성
+            const data = {
+                // 문제 번호는 수정 시에만 포함, 새 문제 생성 시에는 제외 가능
+                ...(problemNumber && { problemNumber: Number(problemNumber) }),
+                problemName,
+                problemContent,
+                problemScore,
+                problemCategory,
+                problemAnswer
+            };
 
-        try {
-            const response = await fetch('/admin/challenge', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+            try {
+                const response = await fetch('/admin/challenge', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-            if (!response.ok) {
-                throw new Error(`서버 오류: ${response.status}`);
+                if (!response.ok) {
+                    // 서버에서 에러 메시지를 JSON 형태로 보낼 경우 파싱하여 출력
+                    const errorData = await response.json();
+                    throw new Error(`서버 오류: ${response.status} - ${errorData.detail || response.statusText}`);
+                }
+
+                alert('문제가 성공적으로 저장되었습니다.');
+
+                // 필요 시 폼 초기화 및 문제 목록 갱신 처리
+                this.reset();
+                document.getElementById('problemNumber').value = '';
+                document.getElementById('problemNumber').disabled = true;
+
+                // 페이지 새로고침
+                location.reload();
+
+            } catch (error) {
+                alert(`저장 중 오류가 발생했습니다: ${error.message}`);
+                console.error('Error:', error);
             }
-
-            const result = await response.json();
-            alert('문제가 성공적으로 저장되었습니다.');
-
-            // 필요 시 폼 초기화 및 문제 목록 갱신 처리
-            this.reset();
-            document.getElementById('problemNumber').value = '';
-            document.getElementById('problemNumber').disabled = true;
-
-            // TODO: 문제 목록 갱신 로직 추가
-
-        } catch (error) {
-            alert(`저장 중 오류가 발생했습니다: ${error.message}`);
-        }
+        });
     });
     </script>
 </body>

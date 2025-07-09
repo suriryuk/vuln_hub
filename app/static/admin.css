@@ -1,0 +1,225 @@
+/* 기본 리셋 및 테마 적용 */
+body {
+    background: linear-gradient(to bottom, #0f172a, #000000); /* 남색에서 검은색으로 그라데이션 */
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #ffffff; /* 기본 글자색 흰색 */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh; /* 최소 높이 설정 */
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+}
+
+a {
+    color: #64ffda; /* 링크 기본 색상 청록색 */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #52e6c8; /* 호버 시 더 밝은 청록색 */
+}
+
+/* 헤더 스타일 (기존 admin.css와 동일) */
+.main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 40px;
+    background: #111827; /* 딥 다크 배경 */
+    border-bottom: 1px solid #374151; /* 짙은 회색 테두리 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.main-header .logo a {
+    color: #64ffda; /* 로고 색상 청록색 */
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.main-nav-left, .main-nav-right {
+    display: flex;
+    gap: 30px;
+}
+
+.main-nav-left a, .main-nav-right a {
+    color: #cbd5e1; /* 옅은 회색 메뉴 텍스트 */
+    font-size: 15px;
+    font-weight: 500;
+    padding: 5px 0;
+}
+
+.main-nav-left a:hover, .main-nav-right a:hover {
+    color: #64ffda; /* 호버 시 청록색 */
+}
+
+.main-nav-right .profile-link {
+    color: #64ffda; /* 프로필 링크는 청록색으로 강조 */
+    font-weight: bold;
+}
+
+/* 메인 컨텐츠 영역 (기존 admin.css와 유사) */
+.admin-main-content {
+    flex-grow: 1; /* 남은 공간을 채우도록 설정 */
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* 섹션 간 간격 */
+    max-width: 1400px; /* 최대 너비 설정 */
+    margin: 0 auto; /* 중앙 정렬 */
+}
+
+.page-title {
+    color: #64ffda;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.section-subtitle {
+    color: #64ffda;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* 요약 통계 섹션 (기존 dashboard-stats와 유사) */
+.admin-stats {
+    display: grid; /* 그리드 레이아웃 사용 */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.admin-stats .stat-box {
+    background: #1f2937; /* 짙은 회색 배경 */
+    border: 1px solid #374151; /* 짙은 회색 테두리 */
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.admin-stats .stat-title {
+    font-size: 16px;
+    color: #cbd5e1; /* 옅은 회색 */
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.admin-stats .stat-value {
+    font-size: 42px;
+    color: #64ffda; /* 청록색 강조 */
+    font-weight: bold;
+}
+
+/* 빠른 링크 섹션 */
+.admin-quick-links .link-card-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+
+.link-card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ffffff; /* 텍스트 색상 */
+}
+
+.link-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.link-card .card-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
+
+.link-card .card-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #64ffda; /* 청록색 강조 */
+    margin-bottom: 10px;
+}
+
+.link-card .card-description {
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+/* 추가 정보 섹션 */
+.admin-info-section .info-box {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.admin-info-section ul {
+    list-style: none; /* 기본 리스트 스타일 제거 */
+    padding: 0;
+    margin: 0;
+}
+
+.admin-info-section ul li {
+    font-size: 15px;
+    color: #cbd5e1;
+    padding: 10px 0;
+    border-bottom: 1px solid #2d3748; /* 리스트 항목 구분선 */
+}
+
+.admin-info-section ul li:last-child {
+    border-bottom: none; /* 마지막 항목은 구분선 없음 */
+}
+
+/* 미디어 쿼리 (작은 화면 대응) */
+@media (max-width: 768px) {
+    .main-header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 20px;
+    }
+
+    .main-nav-left, .main-nav-right {
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .admin-main-content {
+        padding: 20px;
+        gap: 30px;
+    }
+
+    .page-title {
+        font-size: 28px;
+    }
+
+    .section-subtitle {
+        font-size: 20px;
+    }
+
+    .admin-stats, .admin-quick-links .link-card-container {
+        grid-template-columns: 1fr; /* 한 줄에 하나씩 */
+        gap: 20px;
+    }
+
+    .admin-stats .stat-value {
+        font-size: 36px;
+    }
+}
