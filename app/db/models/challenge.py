@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text
+from sqlalchemy import Column, Integer, String, Text, Boolean
 from sqlalchemy.sql import func
 from ..base_class import Base
 
@@ -8,4 +8,6 @@ class Challenge(Base):
     challScore = Column(Integer, nullable=False)
     category = Column(String(255), nullable=False)
     challExplain = Column(Text(), nullable=False)
-    challAnswer = Column(String(255), nullable=False, unique=True)
+    challAnswer = Column(String(255), nullable=False)
+    hasDockerInstance = Column(Boolean, nullable=False)
+    dockerImageNames = Column(Text(), nullable=True)

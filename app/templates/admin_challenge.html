@@ -2,20 +2,20 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin - 문제 관리</title>
     <link rel="stylesheet" href="/assets/admin_challenge.css" />
 </head>
 <body>
     <header class="main-header">
         <div class="logo">
-            <a href="#">Dashboard</a>
+            <a href="/">Dashboard</a>
         </div>
         <nav class="main-nav-left">
-            <a href="/">home</a>
-            <a href="#">menu1</a>
-            <a href="#">menu2</a>
-            <a href="#">menu3</a>
+            <a href="/admin">home</a>
+            <a href="/admin/challenge">challenge</a>
+            <a href="/admin/users">users</a>
+            <a href="/admin/settings">settings</a>
         </nav>
         <nav class="main-nav-right">
             {% if admin %}
@@ -30,47 +30,10 @@
     <main class="admin-main-content">
         <h2 class="page-title">Challenges</h2>
 
-        <!-- 문제 생성 폼 -->
-        <section class="problem-form-section" id="problemFormSection">
-            <div class="section-header">
-                <h3>문제 생성 / 수정</h3>
-                <button type="button" class="toggle-button" id="toggleProblemForm">
-                    <span class="icon">▲</span> <span class="text">폼 최소화</span>
-                </button>
-            </div>
-            <div class="form-content">
-                <form id="problemForm">
-                    <div class="form-row">
-                        <label for="problemNumber">문제 번호</label>
-                        <input type="number" id="problemNumber" name="problemNumber" disabled />
-                    </div>
-                    <div class="form-row">
-                        <label for="problemName">문제 이름</label>
-                        <input type="text" id="problemName" name="problemName" required />
-                    </div>
-                    <div class="form-row">
-                        <label for="problemCategory">문제 카테고리</label>
-                        <input type="text" id="problemCategory" name="problemCategory" required />
-                    </div>
-                    <div class="form-row">
-                        <label for="problemContent">문제 내용</label>
-                        <textarea id="problemContent" name="problemContent" rows="4" required></textarea>
-                    </div>
-                    <div class="form-row">
-                        <label for="problemScore">문제 점수</label>
-                        <input type="number" id="problemScore" name="problemScore" required />
-                    </div>
-                    <div class="form-row">
-                        <label for="problemAnswer">정답</label>
-                        <input type="text" id="problemAnswer" name="problemAnswer" required />
-                    </div>
-                    <div class="form-row form-actions">
-                        <button type="submit" class="btn-primary">저장</button>
-                        <button type="reset" class="btn-secondary">초기화</button>
-                    </div>
-                </form>
-            </div>
-        </section>
+        <!-- 문제 생성 버튼 추가 -->
+        <div class="create-problem-button-container">
+            <button id="createProblemButton" class="btn-primary">새 문제 생성</button>
+        </div>
 
         <!-- 문제 목록 테이블 -->
         <section class="problem-list-section">
@@ -83,18 +46,34 @@
                         <th>문제 점수</th>
                         <th>문제 카테고리</th>
                         <th>정답</th>
+                        <th>Docker</th>
+                        <th>도커 이미지 목록</th> <!-- 도커 이미지 목록 컬럼 추가 -->
                         <th>관리</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in challenges %}
-                    <tr>
+                    <tr data-problem-id="{{ row.id }}"
+                        data-full-explain="{{ row.challExplain }}"  
+                        data-full-answer="{{ row.challAnswer }}"
+                        data-docker-instance-enabled="{{ row.hasDockerInstance }}"
+                        data-docker-image-names="{{ row.dockerImageNames|join(',') if row.dockerImageNames else '' }}">
                         <td>{{ row.id }}</td>
                         <td>{{ row.challName }}</td>
-                        <td>{{ row.challExplain }}</td>
+                        <td>{{ row.challExplain | truncate(50, True, '...') }}</td>
                         <td>{{ row.challScore }}</td>
                         <td>{{ row.category }}</td>
-                        <td>{{ row.challAnswer }}</td>
+                        <td>{{ row.challAnswer | truncate(50, True, '...') }}</td>
+                        <td>{% if row.hasDockerInstance %}✅{% else %}❌{% endif %}</td>
+                        <td>
+                            {% if row.dockerImageNames %}
+                                {% for docker in row.dockerImageNames %}
+                                    {{ docker }}<br>
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td> <!-- 도커 이미지 목록 표시 -->
                         <td>
                             <button class="btn-edit">수정</button>
                             <button class="btn-delete">삭제</button>
@@ -106,154 +85,269 @@
         </section>
     </main>
 
+    <!-- 문제 생성/수정 모달 창 -->
+    <div id="adminProblemModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-button">&times;</button>
+            <h3 id="modalFormTitle"></h3> <!-- 모달 제목: 생성/수정 -->
+            <form id="modalProblemForm">
+                <div class="form-row">
+                    <label for="modalProblemNumber">문제 번호</label>
+                    <input type="number" id="modalProblemNumber" name="problemNumber" disabled />
+                </div>
+                <div class="form-row">
+                    <label for="modalProblemName">문제 이름</label>
+                    <input type="text" id="modalProblemName" name="problemName" required />
+                </div>
+                <div class="form-row">
+                    <label for="modalProblemContent">문제 내용</label>
+                    <textarea id="modalProblemContent" name="problemContent" rows="4" required></textarea>
+                </div>
+                <div class="form-row">
+                    <label for="modalProblemScore">문제 점수</label>
+                    <input type="number" id="modalProblemScore" name="problemScore" required />
+                </div>
+                <div class="form-row">
+                    <label for="modalProblemCategory">문제 카테고리</label>
+                    <input type="text" id="modalProblemCategory" name="problemCategory" required />
+                </div>
+                <div class="form-row">
+                    <label for="modalProblemAnswer">정답</label>
+                    <input type="text" id="modalProblemAnswer" name="problemAnswer" required />
+                </div>
+                <!-- Docker 인스턴스 생성 여부 체크박스 -->
+                <div class="form-row checkbox-row">
+                    <input type="checkbox" id="modalDockerInstanceEnabled" name="dockerInstanceEnabled" />
+                    <label for="modalDockerInstanceEnabled">Docker 인스턴스 생성 활성화</label>
+                </div>
+
+                <!-- Docker 이미지 이름 입력 필드 추가 -->
+                <div class="form-row" id="modalDockerImageContainer">
+                    <label for="modalDockerImageNames">도커 이미지 이름 (각 줄에 하나씩 입력)</label>
+                    <textarea id="modalDockerImageNames" name="dockerImageNames" rows="5" placeholder="예: ubuntu:latest&#10;nginx:stable&#10;myrepo/myimage:1.0"></textarea>
+                </div>
+
+                <div class="form-row form-actions">
+                    <button type="submit" class="btn-primary" id="modalSubmitButton">저장</button>
+                    <button type="button" class="btn-secondary" id="modalCancelButton">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-        // 폼 섹션 및 토글 관련 요소들 추가
-        const problemFormSection = document.getElementById('problemFormSection');
-        const toggleProblemFormButton = document.getElementById('toggleProblemForm');
-        const toggleButtonIcon = toggleProblemFormButton.querySelector('.icon');
-        const toggleButtonText = toggleProblemFormButton.querySelector('.text');
+        // --- 1. 모달 관련 요소들 ---
+        const adminProblemModal = document.getElementById('adminProblemModal');
+        const modalCloseButton = adminProblemModal.querySelector('.modal-close-button');
+        const modalFormTitle = document.getElementById('modalFormTitle');
+        const modalProblemForm = document.getElementById('modalProblemForm'); // 모달 내부의 폼
+        const modalSubmitButton = document.getElementById('modalSubmitButton');
+        const modalCancelButton = document.getElementById('modalCancelButton');
 
-        // 기존 폼 요소들
-        const problemForm = document.getElementById('problemForm');
-        const problemNumberInput = document.getElementById('problemNumber');
-        const problemNameInput = document.getElementById('problemName');
-        const problemContentInput = document.getElementById('problemContent');
-        const problemScoreInput = document.getElementById('problemScore');
-        const problemCategoryInput = document.getElementById('problemCategory');
-        const problemAnswerInput = document.getElementById('problemAnswer');
+        // --- 2. 모달 내부 폼 요소들 ---
+        const modalProblemNumberInput = document.getElementById('modalProblemNumber');
+        const modalProblemNameInput = document.getElementById('modalProblemName');
+        const modalProblemContentInput = document.getElementById('modalProblemContent'); // 문제 내용 (textarea)
+        const modalProblemScoreInput = document.getElementById('modalProblemScore');
+        const modalProblemCategoryInput = document.getElementById('modalProblemCategory');
+        const modalProblemAnswerInput = document.getElementById('modalProblemAnswer'); // 정답 필드
+        const modalDockerInstanceEnabledInput = document.getElementById('modalDockerInstanceEnabled'); // Docker 인스턴스 체크박스
+        const modalDockerImageNamesInput = document.getElementById('modalDockerImageNames'); // Docker 이미지 이름 textarea
+        const modalDockerImageContainer = document.getElementById('modalDockerImageContainer'); // Docker 이미지 입력 필드 컨테이너
 
-        // 기존 테이블 및 버튼 요소들
-        const problemTableBody = document.querySelector('.problem-table tbody'); // tbody 선택자로 변경
-        const btnReset = problemForm.querySelector('button[type="reset"]');
+        // --- 3. 기타 페이지 요소들 ---
+        const createProblemButton = document.getElementById('createProblemButton'); // 새 문제 생성 버튼
+        const problemTableBody = document.querySelector('.problem-table tbody'); // 문제 목록 테이블 body
 
-        // 폼 최소화/확장 버튼 클릭 이벤트 추가
-        toggleProblemFormButton.addEventListener('click', () => {
-            problemFormSection.classList.toggle('minimized'); // 'minimized' 클래스 토글
+        // --- 4. 모달 열기/닫기/초기화/채우기 함수 ---
+        function openModal() {
+            adminProblemModal.classList.add('active');
+            // 모달이 열릴 때마다 Docker 입력 필드의 상태를 업데이트
+            updateModalDockerInputState();
+        }
 
-            // 버튼 텍스트와 아이콘 변경
-            if (problemFormSection.classList.contains('minimized')) {
-                toggleButtonIcon.textContent = '▼'; // 아래 화살표
-                toggleButtonText.textContent = '폼 확장';
+        function closeModal() {
+            adminProblemModal.classList.remove('active');
+            clearModalForm(); // 모달 닫을 때 폼 초기화
+        }
+
+        function clearModalForm() {
+            modalProblemForm.reset(); // 폼 필드 초기화
+            modalProblemNumberInput.value = ''; // 문제 번호 필드 비우기
+            modalProblemNumberInput.disabled = true; // 항상 비활성화
+            modalSubmitButton.textContent = '저장'; // 버튼 텍스트 '저장'으로 변경
+            modalDockerInstanceEnabledInput.checked = false; // Docker 체크박스 초기화
+            // Docker 이미지 입력 필드도 초기화하고 비활성화
+            modalDockerImageNamesInput.value = '';
+            updateModalDockerInputState(); // Docker 입력 필드 상태 업데이트
+        }
+
+        // 수정 시 테이블의 data- 속성 값으로 모달 폼 채우기 함수
+        function fillModalFormFromDataAttributes(rowElement) {
+            const problemId = rowElement.dataset.problemId;
+            const challName = rowElement.querySelector('td:nth-child(2)').textContent.trim();
+            const challExplainFull = rowElement.dataset.fullExplain; // data-full-explain에서 전체 내용 가져오기
+            const challScore = rowElement.querySelector('td:nth-child(4)').textContent.trim();
+            const challCategory = rowElement.querySelector('td:nth-child(5)').textContent.trim();
+            const challAnswerFull = rowElement.dataset.fullAnswer; // data-full-answer에서 전체 정답 가져오기
+            const hasDockerInstance = rowElement.dataset.dockerInstanceEnabled === 'True' || rowElement.dataset.dockerInstanceEnabled === 'true'; // 대소문자 모두 대응
+            // Docker 이미지 이름 가져오기 (콤마로 구분된 문자열을 배열로 변환)
+            const dockerImageNames = rowElement.dataset.dockerImageNames ? rowElement.dataset.dockerImageNames.split(',').join('\n') : '';
+
+            modalProblemNumberInput.value = problemId;
+            modalProblemNameInput.value = challName;
+            modalProblemContentInput.value = challExplainFull; // 전체 내용 채우기
+            modalProblemScoreInput.value = Number(challScore);
+            modalProblemCategoryInput.value = challCategory;
+            modalProblemAnswerInput.value = challAnswerFull; // 전체 정답 채우기
+            modalDockerInstanceEnabledInput.checked = hasDockerInstance; // 체크박스 상태 채우기
+            modalDockerImageNamesInput.value = dockerImageNames; // Docker 이미지 이름 채우기
+
+            modalProblemNumberInput.disabled = true; // 수정 시에도 문제 번호는 수정 불가
+            modalSubmitButton.textContent = '수정'; // 버튼 텍스트 '수정'으로 변경
+
+            // 데이터 채운 후 Docker 입력 필드 상태 업데이트
+            updateModalDockerInputState();
+        }
+
+        // Docker 이미지 입력 필드의 상태를 업데이트하는 함수
+        function updateModalDockerInputState() {
+            if (modalDockerInstanceEnabledInput.checked) {
+                modalDockerImageNamesInput.disabled = false;
+                modalDockerImageContainer.style.opacity = '1';
+                modalDockerImageContainer.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
             } else {
-                toggleButtonIcon.textContent = '▲'; // 위 화살표
-                toggleButtonText.textContent = '폼 최소화';
+                modalDockerImageNamesInput.disabled = true;
+                modalDockerImageNamesInput.value = ''; // 비활성화 시 입력 값 초기화
+                modalDockerImageContainer.style.opacity = '0.5';
+                modalDockerImageContainer.style.pointerEvents = 'none'; // 클릭 이벤트 비활성화
             }
+        }
+
+        // --- 5. 이벤트 리스너 ---
+
+        // 5.1. 새 문제 생성 버튼 클릭 시
+        createProblemButton.addEventListener('click', () => {
+            modalFormTitle.textContent = '새 문제 생성';
+            clearModalForm(); // 폼 초기화
+            openModal();
         });
 
-        // 수정 버튼 클릭 이벤트 위임
+        // 5.2. 문제 목록 테이블 내 버튼 클릭 (수정/삭제)
         problemTableBody.addEventListener('click', async (e) => {
             // 수정 버튼 클릭 시
             if (e.target.classList.contains('btn-edit')) {
                 const row = e.target.closest('tr');
-                const cells = row.querySelectorAll('td');
-
-                const number = cells[0].textContent.trim();
-                const name = cells[1].textContent.trim();
-                const content = cells[2].textContent.trim();
-                const score = cells[3].textContent.trim();
-                const category = cells[4].textContent.trim();
-                const answer = cells[5].textContent.trim();
-
-                problemNumberInput.value = number;
-                problemNameInput.value = name;
-                problemContentInput.value = content;
-                problemScoreInput.value = score;
-                problemCategoryInput.value = category;
-                problemAnswerInput.value = answer;
-
-                problemNumberInput.disabled = true;
-                problemForm.querySelector('.btn-primary').textContent = '수정';
-
-                if (problemFormSection.classList.contains('minimized')) {
-                    problemFormSection.classList.remove('minimized');
-                    toggleButtonIcon.textContent = '▲';
-                    toggleButtonText.textContent = '폼 최소화';
-                }
+                modalFormTitle.textContent = '문제 수정';
+                fillModalFormFromDataAttributes(row); // data- 속성 값으로 폼 채우기
+                openModal(); // 모달 열기
             }
             // 삭제 버튼 클릭 시
             else if (e.target.classList.contains('btn-delete')) {
                 const row = e.target.closest('tr');
-                const problemId = row.cells[0].textContent.trim(); // 문제 번호를 ID로 사용
+                const problemId = row.dataset.problemId;
 
                 if (confirm(`정말로 문제 번호 ${problemId}번을 삭제하시겠습니까?`)) {
                     try {
+                        // 삭제 URL: /admin/challenge/delete/${problemId}
+                        // 메서드: GET (요청하신 대로 유지)
                         const response = await fetch(`/admin/challenge/delete/${problemId}`, {
                             method: 'GET'
                         });
-                        
+
                         if (response.ok) {
-                            alert('문제가 성공적으로 삭제되었습니다.');
-                            location.reload(); // 페이지 새로고침
+                            alert(`문제 번호 ${problemId}번이 성공적으로 삭제되었습니다.`);
+                            // 삭제 후 테이블에서 해당 행 제거 또는 페이지 새로고침
+                            row.remove();
+                            // 또는 location.reload();
                         } else {
-                            alert('삭제 중 오류가 발생했습니다.');
+                            const errorText = await response.text();
+                            alert(`문제 삭제 실패: ${errorText}`);
                         }
                     } catch (error) {
-                        alert(`삭제 중 오류가 발생했습니다: ${error.message}`);
-                        console.error('Error:', error);
+                        console.error('삭제 중 오류 발생:', error);
+                        alert('문제 삭제 중 오류가 발생했습니다.');
                     }
                 }
             }
         });
 
-        // 새 문제 생성 시 폼 초기화 시 문제 번호 비우고 disabled 유지
-        btnReset.addEventListener('click', () => {
-            problemNumberInput.value = '';
-            problemNumberInput.disabled = true;
-            problemForm.querySelector('.btn-primary').textContent = '저장';
-            problemAnswerInput.value = ''; // 정답 필드도 초기화
-        });
+        // 5.3. 모달 닫기 버튼 클릭 시
+        modalCloseButton.addEventListener('click', closeModal);
+        modalCancelButton.addEventListener('click', closeModal); // 취소 버튼도 모달 닫기
 
-        document.getElementById('problemForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // 기본 폼 제출 막기
+        // 5.4. Docker 인스턴스 체크박스 변경 시
+        modalDockerInstanceEnabledInput.addEventListener('change', updateModalDockerInputState);
 
-            // 폼 데이터 수집
-            const problemNumber = document.getElementById('problemNumber').value; // 수정 시에만 값 있음
-            const problemName = document.getElementById('problemName').value.trim();
-            const problemContent = document.getElementById('problemContent').value.trim();
-            const problemScore = Number(document.getElementById('problemScore').value);
-            const problemCategory = document.getElementById('problemCategory').value.trim();
-            const problemAnswer = document.getElementById('problemAnswer').value.trim();
+        // 5.5. 모달 폼 제출 이벤트 (생성/수정)
+        modalProblemForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // 기본 폼 제출 방지
 
-            // JSON 객체 생성
+            const problemId = modalProblemNumberInput.value; // 모달 폼의 문제 번호 (수정 시 사용)
+            const problemName = modalProblemNameInput.value.trim();
+            const problemContent = modalProblemContentInput.value.trim();
+            const problemScore = Number(modalProblemScoreInput.value);
+            const problemCategory = modalProblemCategoryInput.value.trim();
+            const problemAnswer = modalProblemAnswerInput.value.trim();
+            const hasDockerInstance = modalDockerInstanceEnabledInput.checked; // 체크박스 값 가져오기
+
+            let dockerImageNames = [];
+            if (hasDockerInstance) {
+                // Docker 이미지 입력 필드의 값을 줄바꿈 기준으로 분리하고 공백 제거, 비어있는 줄 제거
+                dockerImageNames = modalDockerImageNamesInput.value
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line !== '');
+            }
+
+            // JSON 데이터 객체 생성
             const data = {
-                // 문제 번호는 수정 시에만 포함, 새 문제 생성 시에는 제외 가능
-                ...(problemNumber && { problemNumber: Number(problemNumber) }),
-                problemName,
-                problemContent,
-                problemScore,
-                problemCategory,
-                problemAnswer
+                problemName: problemName,
+                problemContent: problemContent,
+                problemScore: problemScore,
+                problemCategory: problemCategory,
+                problemAnswer: problemAnswer,
+                hasDockerInstance: hasDockerInstance,
+                dockerImageNames: dockerImageNames // Docker 이미지 이름 배열 추가
             };
 
+            // 수정 요청일 경우 problemId를 데이터에 포함 (서버에서 이를 통해 업데이트할지 생성할지 판단)
+            if (problemId) {
+                data.problemNumber = Number(problemId); // 서버 Pydantic 모델에 id 필드가 있다면
+            }
+
+            // URL: /admin/challenge
+            // 메서드: POST
+            let url = '/admin/challenge';
+            let method = 'POST';
+
             try {
-                const response = await fetch('/admin/challenge', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
                 if (!response.ok) {
-                    // 서버에서 에러 메시지를 JSON 형태로 보낼 경우 파싱하여 출력
-                    const errorData = await response.json();
-                    throw new Error(`서버 오류: ${response.status} - ${errorData.detail || response.statusText}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`서버 오류: ${response.status} - ${errorData.detail || response.statusText || '알 수 없는 오류'}`);
                 }
 
                 alert('문제가 성공적으로 저장되었습니다.');
-
-                // 필요 시 폼 초기화 및 문제 목록 갱신 처리
-                this.reset();
-                document.getElementById('problemNumber').value = '';
-                document.getElementById('problemNumber').disabled = true;
-
-                // 페이지 새로고침
-                location.reload();
+                location.reload(); // 성공 시 페이지 새로고침 (모달도 닫힘)
 
             } catch (error) {
                 alert(`저장 중 오류가 발생했습니다: ${error.message}`);
                 console.error('Error:', error);
+            }
+        });
+
+        // 5.4. 모달 닫기 버튼 및 외부 클릭 시 모달 닫기
+        modalCloseButton.addEventListener('click', closeModal);
+        modalCancelButton.addEventListener('click', closeModal); // 취소 버튼 클릭 시
+        adminProblemModal.addEventListener('click', (event) => {
+            if (event.target === adminProblemModal) {
+                closeModal();
             }
         });
     });

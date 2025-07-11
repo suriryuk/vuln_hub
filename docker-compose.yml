@@ -29,6 +29,9 @@ services:
       - "8000:8000"
       - "80:8000"
     env_file: .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./app:/app
     environment:
       TZ: "Asia/Seoul"
     depends_on:

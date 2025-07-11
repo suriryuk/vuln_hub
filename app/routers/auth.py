@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, Cookie
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.dialects.mysql import insert
+from sqlalchemy import insert, update, and_
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
+from typing import Annotated
 from hashlib import sha256
 
 from db.models.user import User
 from db.session import get_db
 from utils.models.login import LoginInfo
 from utils.models.register import RegisterInfo
-from utils.jwt_auth import create_access_token
+from utils.jwt_auth import create_access_token, user_login
 
 templates = Jinja2Templates(directory='templates')
 
@@ -28,7 +30,12 @@ def login(request: Request):
 @router.post('/login')
 def login_db(userinfo: LoginInfo, response: Response, db: Session = Depends(get_db)):
     # user 조회 쿼리
-    user = db.query(User).filter(User.userid == userinfo.userid and User.password == sha256(userinfo.password.encode()).hexdigest()).first()
+    user = db.query(User).filter(
+        and_(
+            User.userid == userinfo.userid,
+            User.password == sha256(userinfo.password.encode()).hexdigest()
+        )
+    ).first()
 
     if user is not None:
         # JWT 토큰 생성
@@ -43,6 +50,24 @@ def login_db(userinfo: LoginInfo, response: Response, db: Session = Depends(get_
             samesite='lax',
             path='/'
         )
+
+        # 활동 시간 기록
+        try:
+            stmt = (
+                update(User)
+                .where(User.userid == userinfo.userid)
+                .values(accessDate = func.now())
+            )
+
+            db.execute(stmt)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print(e)
+            raise HTTPException(
+                status_code=500,
+                detail='Internal Server Error'
+            )
 
         return {'message': 'login success <a href="/">메인으로 가기</a>'}
     
@@ -62,12 +87,25 @@ def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail='The password and confirmation password do not match.')
     
     # user 조회 쿼리 ( 중복 사용자 생성 방지 )
-    user = db.query(User).filter(User.userid == userinfo.userid and User.password == sha256(userinfo.password.encode()).hexdigest()).first()
+    user = db.query(User).filter(
+        and_(
+            User.userid == userinfo.userid,
+            User.password == sha256(userinfo.password.encode()).hexdigest()
+        )
+    ).first()
+
     if user:
         raise HTTPException(status_code=400, detail='User already exist')
     
     stmt = (
-        insert(User).values(userid=userinfo.userid, password=sha256(userinfo.password.encode()).hexdigest(), nickname=userinfo.nickname, score=0, admin=False)
+        insert(User)
+        .values(
+            userid=userinfo.userid, 
+            password=sha256(userinfo.password.encode()).hexdigest(), 
+            nickname=userinfo.nickname, 
+            score=0, 
+            admin=False
+        )
     )
 
     try:
@@ -87,9 +125,29 @@ def register_db(userinfo: RegisterInfo, db: Session = Depends(get_db)):
     return {'message': 'user create successfully'}
 
 @router.get('/logout', response_class=HTMLResponse)
-def logout(response: Response):
+def logout(response: Response, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
+    current_user = user_login(UserToken)
+    
     response.delete_cookie(
         key='UserToken'
     )
+
+    # 활동 시간 기록 
+    try:
+        stmt = (
+            update(User)
+            .where(User.userid == current_user)
+            .values(accessDate = func.now())
+        )
+
+        db.execute(stmt)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(e)
+        raise HTTPException(
+            status_code=500,
+            detail='Internal Server Error'
+        )
 
     return '<script>alert("logout success"); location.href="/auth/login"</script>'

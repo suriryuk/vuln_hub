@@ -30,14 +30,20 @@
     <main class="main-content-problem-list">
         <section class="problem-list">
             {% for row in challenges %}
-            <article class="problem-item">
+            <article class="problem-item{% if row.challName in solved_challs %} solved{% endif %}">
                 <div class="problem-info"
                      data-problem-id="{{ row.id }}"
                      data-problem-title="{{ row.challName }}"
                      data-full-description="{{ row.challExplain }}"
                      data-problem-score="{{ row.challScore }}"
-                     data-problem-category="{{ row.category }}"> <!-- 문제 카테고리 추가 -->
-                    <h4 class="problem-title">{{ row.challName }}</h4>
+                     data-problem-category="{{ row.category }}"
+                     data-docker-instance-enabled="{{ row.hasDockerInstance }}">
+                    <h4 class="problem-title">
+                        {{ row.challName }}
+                        {% if row.challName in solved_challs %}
+                            <span class="solved-badge">✔</span>
+                        {% endif %}
+                    </h4>
                     <p class="problem-description">{{ row.challExplain | truncate(100, True, '...') }}</p>
                 </div>
                 <div class="problem-score">점수: {{ row.challScore }}</div>
@@ -51,7 +57,7 @@
         <div class="modal-content" data-current-problem-id="">
             <button class="modal-close-button">&times;</button>
             <h3 id="modalProblemTitle"></h3>
-            <div id="modalProblemCategory" class="modal-category-display"></div> 
+            <div id="modalProblemCategory" class="modal-category-display"></div>
             <p id="modalProblemDescription"></p>
     
             <div class="modal-score-display">
@@ -59,9 +65,28 @@
                 <span id="modalProblemScore" class="score-value"></span>
             </div>
     
+            <!-- 인스턴스 생성 섹션 -->
+            <div id="modalInstanceSection" class="modal-instance-section" style="display: none;">
+                <div class="instance-controls-wrapper">
+                    <!-- 인스턴스 상태 표시 영역 (IP/Port 또는 로딩 인디케이터) -->
+                    <div class="instance-status-area">
+                        <div id="instanceInfoDisplay" class="instance-info-display">
+                            <p>IP: <span id="instanceIp"></span></p>
+                            <p>Port: <span id="instancePort"></span></p>
+                        </div>
+                        <div id="instanceLoadingIndicator" class="instance-loading-indicator" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>인스턴스 생성 중...</p>
+                        </div>
+                    </div>
+                    <!-- 인스턴스 생성 버튼 -->
+                    <button id="createInstanceButton" class="btn-secondary">인스턴스 생성</button>
+                </div>
+            </div>
+    
             <div class="modal-answer-section">
                 <label for="answerInput">정답 입력:</label>
-                <input type="text" id="answerInput" placeholder="여기에 정답을 입력하세요." /> 
+                <input type="text" id="answerInput" placeholder="여기에 정답을 입력하세요." />
                 <button id="submitAnswerButton" class="btn-primary">제출</button>
             </div>
         </div>
@@ -79,6 +104,14 @@
         const answerInput = document.getElementById('answerInput');
         const submitAnswerButton = document.getElementById('submitAnswerButton');
 
+        // 인스턴스 관련 요소들
+        const modalInstanceSection = document.getElementById('modalInstanceSection');
+        const createInstanceButton = document.getElementById('createInstanceButton');
+        const instanceInfoDisplay = document.getElementById('instanceInfoDisplay');
+        const instanceLoadingIndicator = document.getElementById('instanceLoadingIndicator'); // 로딩 인디케이터 추가
+        const instanceIp = document.getElementById('instanceIp');
+        const instancePort = document.getElementById('instancePort');
+
         // 문제 아이템 클릭 이벤트 리스너 (이벤트 위임)
         if (problemListSection) {
             problemListSection.addEventListener('click', (event) => {
@@ -91,7 +124,9 @@
                         const fullDescription = problemInfo.dataset.fullDescription;
                         const score = problemInfo.dataset.problemScore;
                         const category = problemInfo.dataset.problemCategory; // 카테고리 가져오기
+                        const hasDockerInstance = problemInfo.dataset.dockerInstanceEnabled === 'True' || problemInfo.dataset.dockerInstanceEnabled === 'true'; // Docker 인스턴스 이름 가져오기
 
+                        console.log(hasDockerInstance);
                         // 모달에 내용 채우기
                         modalProblemTitle.textContent = title;
                         modalProblemCategory.textContent = `카테고리: ${category}`; // 카테고리 표시
@@ -103,6 +138,22 @@
 
                         // 정답 입력 필드 초기화
                         answerInput.value = '';
+
+                        // 인스턴스 섹션 가시성 제어 및 초기화
+                        if (hasDockerInstance) {
+                            modalInstanceSection.style.display = 'block'; // 인스턴스 섹션 보이기
+                            createInstanceButton.disabled = false; // 버튼 활성화
+                            createInstanceButton.textContent = '인스턴스 생성'; // 버튼 텍스트 초기화
+                            
+                            // IP/Port 정보 초기 상태
+                            instanceIp.textContent = ''; // 초기에는 값 비워두기
+                            instancePort.textContent = ''; // 초기에는 값 비워두기
+                            instanceInfoDisplay.style.display = 'flex'; // IP/Port 라벨은 보이도록
+                            instanceLoadingIndicator.style.display = 'none'; // 로딩 인디케이터 숨기기
+                            createInstanceButton.style.display = 'block'; // 버튼 보이기
+                        } else {
+                            modalInstanceSection.style.display = 'none'; // 인스턴스 섹션 숨기기
+                        }
 
                         // 모달 보이기
                         problemModal.classList.add('active');
@@ -123,9 +174,60 @@
             }
         });
 
+        // 인스턴스 생성 버튼 클릭 이벤트 리스너
+        createInstanceButton.addEventListener('click', async () => {
+            const problemId = problemModal.querySelector('.modal-content').dataset.currentProblemId;
+            
+            // 로딩 상태 시작
+            createInstanceButton.style.display = 'none'; // 버튼 숨기기
+            instanceInfoDisplay.style.display = 'none'; // IP/Port 정보 숨기기
+            instanceLoadingIndicator.style.display = 'flex'; // 로딩 인디케이터 보이기
+
+            try {
+                const response = await fetch(`/challenge/instance/${problemId}`, {
+                    method: 'GET', // GET 요청으로 변경
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                    // GET 요청은 body를 포함하지 않습니다.
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`인스턴스 생성 실패: ${response.status} - ${errorData.message || response.statusText}`);
+                }
+
+                const result = await response.json(); // 예: { "ip": "...", "port": "..." }
+
+                // 성공 시
+                instanceIp.textContent = result.ip || 'N/A';
+                instancePort.textContent = result.port || 'N/A';
+                instanceInfoDisplay.style.display = 'flex'; // IP/Port 정보 보이기 (flex로 변경)
+                createInstanceButton.textContent = '인스턴스 생성 완료'; // 버튼 텍스트 변경
+                createInstanceButton.disabled = true; // 생성 완료 후 버튼 비활성화
+                createInstanceButton.style.display = 'block'; // 버튼 다시 보이기
+
+            } catch (error) {
+                // 실패 시
+                alert(`인스턴스 생성 중 오류가 발생했습니다: ${error.message}`);
+                console.error('Instance creation Error:', error);
+                createInstanceButton.textContent = '생성 실패 (재시도)'; // 실패 시 버튼 텍스트 변경
+                createInstanceButton.disabled = false; // 재시도 가능하게 활성화
+                createInstanceButton.style.display = 'block'; // 버튼 다시 보이기
+                // 실패 시 IP/Port 라벨만 보이도록 값은 비워둠
+                instanceIp.textContent = ''; 
+                instancePort.textContent = '';
+                instanceInfoDisplay.style.display = 'flex'; 
+            } finally {
+                instanceLoadingIndicator.style.display = 'none'; // 로딩 인디케이터 숨기기
+            }
+        });
+
         // 정답 제출 버튼 클릭 이벤트 리스너
         submitAnswerButton.addEventListener('click', async () => {
-            const problemId = problemModal.querySelector('.modal-content').dataset.currentProblemId;
+            const modalContent = problemModal.querySelector('.modal-content');
+            const problemId = modalContent.dataset.currentProblemId;
+            const problemName = modalProblemTitle.textContent;
             const userAnswer = answerInput.value.trim();
 
             if (!userAnswer) {
@@ -134,13 +236,14 @@
             }
 
             try {
-                const response = await fetch('/submit-answer', {
+                const response = await fetch('/challenge/answer', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         problem_id: problemId,
+                        problem_name: problemName,
                         user_answer: userAnswer
                     })
                 });
@@ -160,6 +263,8 @@
 
                 problemModal.classList.remove('active');
                 answerInput.value = '';
+
+                location.reload();
 
             } catch (error) {
                 alert(`정답 제출 중 오류가 발생했습니다: ${error.message}`);

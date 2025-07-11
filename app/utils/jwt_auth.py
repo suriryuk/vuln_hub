@@ -50,7 +50,7 @@ def user_login(UserToken: str):
         )
 
     current_user = get_current_user(UserToken)
-    if current_user is None:
+    if current_user is None or current_user == None:
         # return '<script>alert("Invalid authentication token."); location.href="/auth/login"</script>'
         raise HTTPException(
             status_code=302,

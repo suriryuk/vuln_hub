@@ -321,3 +321,156 @@ body {
     text-align: left;
     padding-right: 5px; /* 약간의 여백 */
 }
+
+/* 인스턴스 생성 섹션 */
+.modal-instance-section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: #1f2937; /* 배경색 추가 */
+    border: 1px solid #374151; /* 테두리 추가 */
+    border-radius: 8px; /* 모서리 둥글게 */
+    padding: 15px; /* 내부 패딩 */
+}
+
+/* 인스턴스 컨트롤러 래퍼 (IP/Port 영역과 버튼을 가로로 정렬) */
+.instance-controls-wrapper {
+    display: flex;
+    justify-content: space-between; /* 정보와 버튼을 양쪽으로 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 15px; /* 정보와 버튼 사이 간격 */
+}
+
+/* 인스턴스 상태 표시 영역 (IP/Port 또는 로딩 인디케이터를 담을 공간) */
+.instance-status-area {
+    flex-grow: 1; /* 남은 공간을 최대한 차지 */
+    position: relative; /* 로딩 인디케이터를 겹치기 위함 */
+    min-height: 40px; /* IP/Port 라인 또는 로딩 스피너가 들어갈 최소 높이 */
+    display: flex; /* 내부 요소 정렬을 위해 */
+    justify-content: center; /* 내부 요소(로딩) 중앙 정렬 */
+    align-items: center; /* 내부 요소(로딩) 중앙 정렬 */
+}
+
+/* 인스턴스 생성 버튼 */
+.modal-instance-section #createInstanceButton {
+    flex-shrink: 0; /* 공간이 부족해도 버튼이 줄어들지 않도록 */
+    padding: 10px 20px; /* 버튼 패딩 조정 */
+    font-size: 1em; /* 폰트 크기 조정 */
+    border-radius: 6px; /* 모서리 둥글게 */
+    /* 기존 btn-secondary 스타일 (background-color, color, border 등) 상속 */
+}
+
+.modal-instance-section #createInstanceButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-instance-section #createInstanceButton:hover {
+    background-color: #52e6c8;
+}
+
+/* 인스턴스 정보 표시 영역 (IP/Port 텍스트) */
+.instance-info-display {
+    text-align: left;
+    font-size: 0.95em;
+    color: #cbd5e1;
+    display: flex; /* IP와 Port를 세로로 정렬 */
+    flex-direction: column;
+    gap: 5px; /* IP/Port 줄 사이 간격 */
+    width: 100%; /* 부모 너비에 맞춤 */
+    justify-content: flex-start; /* 텍스트 위쪽 정렬 */
+    align-items: flex-start; /* 텍스트 왼쪽 정렬 */
+}
+
+.instance-info-display p {
+    margin: 0; /* 기본 마진 제거 */
+}
+
+.instance-info-display span {
+    color: #64ffda;
+    font-weight: bold;
+}
+
+/* 로딩 인디케이터 */
+.instance-loading-indicator {
+    position: absolute; /* instance-status-area 내에서 절대 위치 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1f2937; /* 인스턴스 섹션 배경과 동일하게 */
+    display: flex; /* 스피너와 텍스트를 가로로 정렬 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 10px; /* 스피너와 텍스트 사이 간격 */
+    color: #cbd5e1;
+    font-size: 0.95em;
+}
+
+/* 로딩 스피너 CSS (간단한 원형 스피너) */
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #64ffda; /* 청록색 부분 */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite; /* 1초 동안 선형 회전 무한 반복 */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 공통 스타일 (웹킷 기반 브라우저) */
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 전체 너비/높이 */
+::-webkit-scrollbar {
+    width: 8px;  /* 세로 스크롤바 너비 */
+    height: 8px; /* 가로 스크롤바 높이 */
+}
+
+/* 스크롤바 트랙 (배경) */
+::-webkit-scrollbar-track {
+    background: #111827; /* 헤더 배경색과 유사한 어두운 색 */
+    border-radius: 10px; /* 트랙 모서리 둥글게 */
+}
+
+/* 스크롤바 썸 (움직이는 부분) */
+::-webkit-scrollbar-thumb {
+    background-color: #64ffda; /* 테마의 청록색 */
+    border-radius: 10px; /* 썸 모서리 둥글게 */
+    border: 2px solid #111827; /* 썸과 트랙 사이에 약간의 테두리 */
+}
+
+/* 스크롤바 썸 호버 시 */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #52e6c8; /* 호버 시 더 밝은 청록색 */
+}
+
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 공통 스타일 (파이어폭스) */
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 너비 (thin, auto, none) */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #64ffda #111827; /* 썸 색상 트랙 색상 */
+}
+
+.problem-item.solved {
+    border-color: #1ec773 !important;
+    border-width: 3px !important;
+}
+
+.solved-badge {
+    display: inline-block;
+    background: #fff;
+    color: #1ec773;
+    font-weight: bold;
+    border-radius: 12px;
+    padding: 2px 10px 2px 8px;
+    margin-left: 8px;
+    font-size: 0.95em;
+    vertical-align: middle;
+    box-shadow: 0 1px 4px rgba(30, 199, 115, 0.15);
+}

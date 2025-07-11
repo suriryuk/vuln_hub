@@ -56,11 +56,11 @@ body {
 .admin-main-content {
     flex-grow: 1;
     padding: 30px 40px;
-    max-width: 1400px; /* 기존 1200px에서 1400px로 증가 (원하는 너비로 조절 가능) */
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 40px;
+    max-width: 1800px;
+    margin: 0 auto;
 }
 
 .page-title {
@@ -146,16 +146,17 @@ body {
     margin-bottom: 0;
 }
 
+/* 폼 행 스타일 */
 .form-row {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-row label {
-    font-weight: 600;
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
     color: #cbd5e1;
-    margin-bottom: 6px;
 }
 
 .form-row input,
@@ -176,41 +177,45 @@ body {
     border-color: #64ffda;
 }
 
+/* 폼 액션 버튼 그룹 */
 .form-actions {
     display: flex;
-    gap: 15px;
-    justify-content: flex-end;
+    justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+    gap: 10px;
+    margin-top: 30px;
 }
 
-.btn-primary {
-    background-color: #64ffda;
-    color: #000000;
+/* 기본 버튼 스타일 */
+.btn-primary, .btn-secondary {
     border: none;
-    padding: 10px 25px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.btn-primary:hover {
-    background-color: #52e6c8;
-}
-
-.btn-secondary {
-    background-color: transparent;
-    color: #64ffda;
-    border: 1px solid #64ffda;
-    padding: 10px 25px;
-    border-radius: 6px;
+    border-radius: 25px;
+    padding: 12px 25px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
 }
 
-.btn-secondary:hover {
-    background-color: #64ffda;
+/* 주 버튼 (저장) */
+.btn-primary {
+    background: #64ffda; /* 청록색 */
+    color: #1f2937;
+}
+
+.btn-primary:hover {
+    background: #52e6c8;
     color: #000000;
+}
+
+/* 보조 버튼 (취소) */
+.btn-secondary {
+    background: #374151; /* 짙은 회색 */
+    color: #cbd5e1;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+    color: #ffffff;
 }
 
 /* 문제 목록 테이블 */
@@ -220,6 +225,7 @@ body {
 
 .problem-table {
     width: 100%;
+    min-width: 1400px;
     border-collapse: collapse;
     background: #1f2937;
     border: 1px solid #374151;
@@ -238,8 +244,8 @@ body {
     text-align: left;
     color: #cbd5e1;
     border-bottom: 1px solid #374151;
-    word-wrap: break-word; /* 내용이 길면 자동으로 줄바꿈 */
-    word-break: break-all; /* 단어 중간에도 줄바꿈 허용 */
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .problem-table th {
@@ -251,34 +257,66 @@ body {
     vertical-align: middle;
 }
 
-/* 특정 컬럼의 너비를 지정하여 균형 조절 (선택 사항) */
+/* 체크박스 행 스타일 */
+.form-row.checkbox-row {
+    flex-direction: row; /* 체크박스와 라벨을 가로로 정렬 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 10px; /* 체크박스와 라벨 사이 간격 */
+    margin-bottom: 15px;
+}
+
+.form-row.checkbox-row input[type="checkbox"] {
+    width: 20px; /* 체크박스 크기 조정 */
+    height: 20px;
+    margin: 0; /* 기본 마진 제거 */
+    accent-color: #64ffda; /* 체크박스 색상 (최신 브라우저 지원) */
+}
+
+.form-row.checkbox-row label {
+    margin-bottom: 0; /* 라벨 기본 마진 제거 */
+    font-weight: normal; /* 라벨 폰트 굵기 조정 */
+    color: #cbd5e1; /* 텍스트 색상 */
+}
+
+/* 테이블 컬럼 너비 조정 */
 .problem-table th:nth-child(1), /* 문제 번호 */
 .problem-table td:nth-child(1) {
-    width: 8%;
+    width: 6%; /* 비율 조정 */
 }
 .problem-table th:nth-child(2), /* 문제 이름 */
 .problem-table td:nth-child(2) {
-    width: 15%;
+    width: 15%; /* 비율 조정 */
 }
 .problem-table th:nth-child(3), /* 문제 내용 */
 .problem-table td:nth-child(3) {
-    width: 25%;
+    width: 25%; /* 문제 내용 더 넓게 */
 }
 .problem-table th:nth-child(4), /* 문제 점수 */
 .problem-table td:nth-child(4) {
-    width: 8%;
+    width: 6%; /* 비율 조정 */
 }
 .problem-table th:nth-child(5), /* 문제 카테고리 */
 .problem-table td:nth-child(5) {
-    width: 12%;
+    width: 10%; /* 비율 조정 */
 }
 .problem-table th:nth-child(6), /* 정답 */
 .problem-table td:nth-child(6) {
-    width: 15%;
+    width: 15%; /* 비율 조정 */
 }
-.problem-table th:nth-child(7), /* 관리 */
+.problem-table th:nth-child(7), /* Docker */
 .problem-table td:nth-child(7) {
-    width: 17%;
+    width: 6%; /* 비율 조정 */
+}
+.problem-table th:nth-child(8), /* 관리 */
+.problem-table td:nth-child(8) {
+    width: 17%; /* 관리 버튼 공간 더 넓게 확보 */
+    white-space: nowrap; /* 관리 버튼이 줄바꿈되지 않도록 (버튼 자체는) */
+}
+
+.problem-table th:nth-child(9), /* 관리 */
+.problem-table td:nth-child(9) {
+    width: 20%; /* 더 넓게 확보 */
+    white-space: nowrap;
 }
 
 .btn-edit {
@@ -323,6 +361,17 @@ body {
     /* font-size: 14px; */ /* 필요하다면 폰트 크기도 함께 조절할 수 있습니다. */
 }
 
+/* 새 문제 생성 버튼 컨테이너 */
+.create-problem-button-container {
+    text-align: right; /* 버튼을 오른쪽으로 정렬 */
+    margin-bottom: 20px;
+}
+
+.create-problem-button-container .btn-primary {
+    padding: 10px 25px;
+    font-size: 16px;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .main-header {
@@ -343,8 +392,13 @@ body {
 
     .problem-table th,
     .problem-table td {
-        padding: 10px 8px;
-        font-size: 13px;
+        padding: 6px 4px;
+        font-size: 12px;
+    }
+
+    .problem-table td button {
+        display: block;
+        margin-bottom: 4px;
     }
 
     .form-row input,
@@ -357,4 +411,251 @@ body {
         gap: 10px;
         align-items: stretch;
     }
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    display: none; /* 초기에는 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* 어두운 반투명 배경 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* 다른 요소 위에 표시 */
+}
+
+/* 모달 표시/숨김을 위한 클래스 (JS에서 토글) */
+.modal-overlay.active {
+    display: flex;
+}
+
+/* 모달 내용 컨테이너 */
+.modal-content {
+    background: #1f2937; /* 로그인 컨테이너와 동일한 배경 */
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    padding: 30px 25px 40px;
+    max-width: 600px; /* 적절한 모달 너비 */
+    width: 90%; /* 반응형 */
+    position: relative;
+    box-sizing: border-box;
+    color: #ffffff; /* 기본 텍스트 색상 */
+}
+
+/* 모달 제목 */
+.modal-content h3 {
+    font-size: 24px;
+    color: #64ffda; /* 청록색 */
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* 모달 닫기 버튼 */
+.modal-close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #cbd5e1; /* 옅은 회색 */
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close-button:hover {
+    color: #64ffda; /* 청록색 */
+}
+
+/* 모달 내부 폼 스타일 (기존 .form-row, input, textarea, btn-primary/secondary 스타일 재활용) */
+.modal-content .form-row {
+    margin-bottom: 15px;
+}
+
+.modal-content .form-row label {
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 6px;
+}
+
+.modal-content .form-row input,
+.modal-content .form-row textarea {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: #ffffff;
+    font-size: 14px;
+    resize: vertical;
+    transition: border-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modal-content .form-row input:focus,
+.modal-content .form-row textarea:focus {
+    outline: none;
+    border-color: #64ffda;
+}
+
+.modal-content .form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.modal-content .btn-primary,
+.modal-content .btn-secondary {
+    padding: 10px 25px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.modal-content .btn-primary {
+    background-color: #64ffda;
+    color: #000000;
+    border: none;
+}
+
+.modal-content .btn-primary:hover {
+    background-color: #52e6c8;
+}
+
+.modal-content .btn-secondary {
+    background-color: transparent;
+    color: #64ffda;
+    border: 1px solid #64ffda;
+}
+
+.modal-content .btn-secondary:hover {
+    background-color: #64ffda;
+    color: #000000;
+}
+
+/* 입력 필드 (input, textarea) 공통 스타일 */
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content textarea {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #374151;
+    border-radius: 10px; /* 모달 필드도 둥근 모서리 */
+    background: #111827;
+    color: #e5e5e5;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s, opacity 0.3s;
+    resize: vertical; /* textarea 세로 크기 조절 가능 */
+}
+
+/* 입력 필드: 포커스 효과 */
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus,
+.modal-content textarea:focus {
+    border-color: #64ffda;
+    box-shadow: 0 0 8px rgba(100, 255, 218, 0.5);
+    outline: none;
+}
+
+/* 체크박스 행 */
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.checkbox-row input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #374151;
+    border-radius: 4px;
+    background-color: #111827;
+    cursor: pointer;
+    position: relative;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.checkbox-row input[type="checkbox"]:checked {
+    background-color: #64ffda;
+    border-color: #64ffda;
+}
+
+.checkbox-row input[type="checkbox"]:checked::after {
+    content: '\2713';
+    font-size: 14px;
+    color: #1f2937;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.checkbox-row label {
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Docker 이미지 입력 컨테이너 (초기 비활성 상태) */
+#modalDockerImageContainer {
+    opacity: 0.5; /* 비활성화 시 흐리게 */
+    pointer-events: none; /* 클릭 이벤트 비활성화 */
+    transition: opacity 0.3s;
+}
+
+/* Docker 이미지 입력 textarea 비활성화 시 스타일 */
+#modalDockerImageNames:disabled {
+    background-color: #0c1017; /* 비활성화 시 더 어두운 배경 */
+    cursor: not-allowed;
+}
+
+#modalProblemContent {
+    font-family: 'Noto Sans KR', sans-serif; /* 원하는 폰트 이름으로 변경 */
+    /* font-size: 14px; */ /* 필요하다면 폰트 크기도 함께 조절할 수 있습니다. */
+}
+
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 공통 스타일 (웹킷 기반 브라우저) */
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 전체 너비/높이 */
+::-webkit-scrollbar {
+    width: 8px;  /* 세로 스크롤바 너비 */
+    height: 8px; /* 가로 스크롤바 높이 */
+}
+
+/* 스크롤바 트랙 (배경) */
+::-webkit-scrollbar-track {
+    background: #111827; /* 헤더 배경색과 유사한 어두운 색 */
+    border-radius: 10px; /* 트랙 모서리 둥글게 */
+}
+
+/* 스크롤바 썸 (움직이는 부분) */
+::-webkit-scrollbar-thumb {
+    background-color: #64ffda; /* 테마의 청록색 */
+    border-radius: 10px; /* 썸 모서리 둥글게 */
+    border: 2px solid #111827; /* 썸과 트랙 사이에 약간의 테두리 */
+}
+
+/* 스크롤바 썸 호버 시 */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #52e6c8; /* 호버 시 더 밝은 청록색 */
+}
+
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 공통 스타일 (파이어폭스) */
+/* ---------------------------------------------------------------------- */
+/* 스크롤바 너비 (thin, auto, none) */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #64ffda #111827; /* 썸 색상 트랙 색상 */
 }

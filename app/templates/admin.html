@@ -11,10 +11,10 @@
 <body>
     <header class="main-header">
         <div class="logo">
-            <a href="#">Dashboard</a>
+            <a href="/">Dashboard</a>
         </div>
         <nav class="main-nav-left">
-            <a href="/">home</a>
+            <a href="/admin">home</a>
             <a href="/admin/challenge">challenge</a>
             <a href="/admin/users">users</a>
             <a href="/admin/settings">settings</a>
@@ -36,11 +36,11 @@
         <section class="admin-stats">
             <div class="stat-box">
                 <div class="stat-title">총 사용자 수</div>
-                <div class="stat-value">1,234</div>
+                <div class="stat-value">{{ dash_info.all_user_cnt }}</div>
             </div>
             <div class="stat-box">
                 <div class="stat-title">총 문제 수</div>
-                <div class="stat-value">50</div>
+                <div class="stat-value">{{ dash_info.all_prob_cnt }}</div>
             </div>
             <div class="stat-box">
                 <div class="stat-title">해결된 문제 수</div>
@@ -48,7 +48,7 @@
             </div>
             <div class="stat-box">
                 <div class="stat-title">활성 사용자</div>
-                <div class="stat-value">256</div>
+                <div class="stat-value">{{ dash_info.active_users }}</div>
             </div>
         </section>
 

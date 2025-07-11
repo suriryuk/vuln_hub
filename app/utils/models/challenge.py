@@ -8,3 +8,5 @@ class ChallengeInfo(BaseModel):
     problemScore: int
     problemCategory: str
     problemAnswer: str
+    hasDockerInstance: bool
+    dockerImageNames: list
