@@ -44,7 +44,7 @@
             </div>
             <div class="stat-box">
                 <div class="stat-title">해결된 문제 수</div>
-                <div class="stat-value">897</div>
+                <div class="stat-value">{{ dash_info.solve_prob_cnt }}</div>
             </div>
             <div class="stat-box">
                 <div class="stat-title">활성 사용자</div>
@@ -84,10 +84,9 @@
             <h3 class="section-subtitle">최근 활동</h3>
             <div class="info-box">
                 <ul>
-                    <li>riryuksu님이 '웹 해킹 기초' 문제를 해결했습니다. (5분 전)</li>
-                    <li>새로운 사용자 'user_new'님이 가입했습니다. (1시간 전)</li>
-                    <li>관리자 'admin'님이 'SQL Injection' 문제를 수정했습니다. (3시간 전)</li>
-                    <li>'네트워크 분석' 카테고리에 새 문제 '패킷 분석 챌린지'가 추가되었습니다. (어제)</li>
+                    {% for event in dash_info.recent_events %}
+                    <li>{{ event.event_time }} | '{{ event.user_id }}'님이 '{{ event.event_detail }}' {{ event.event_type }}</li>
+                    {% endfor %}
                 </ul>
             </div>
         </section>

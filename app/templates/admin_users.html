@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - 사용자 관리</title>
+    <!-- 기존 문제 관리 페이지와 동일한 CSS 파일을 사용합니다. -->
+    <link rel="stylesheet" href="/assets/admin_users.css" />
+    <!-- 필요하다면 사용자 관리 페이지에 특화된 추가 CSS를 여기에 포함할 수 있습니다. -->
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <a href="/">Dashboard</a>
+        </div>
+        <nav class="main-nav-left">
+            <a href="/admin">home</a>
+            <a href="/admin/challenge">challenge</a>
+            <a href="/admin/users" class="active">users</a> <!-- 현재 페이지를 'active'로 표시 -->
+            <a href="/admin/settings">settings</a>
+        </nav>
+        <nav class="main-nav-right">
+            {% if admin %}
+            <a href="/admin" class="profile-link">{{ user_id }}</a>
+            {% else %}
+            <a href="#" class="profile-link">{{ user_id }}</a>
+            {% endif %}
+            <a href="/auth/logout" class="logout-link">Logout</a>
+        </nav>
+    </header>
+
+    <main class="admin-main-content">
+        <h2 class="page-title">Users</h2>
+
+        <!-- 새 사용자 생성 버튼 -->
+        <div class="create-button-container">
+            <button id="createUserButton" class="btn-primary">새 사용자 생성</button>
+        </div>
+
+        <!-- 사용자 목록 테이블 -->
+        <section class="user-list-section problem-list-section">
+            <table class="user-table problem-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>사용자 ID</th>
+                        <th>닉네임</th>
+                        <th>가입일</th>
+                        <th>점수</th>
+                        <th>관리자 여부</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 서버 사이드 템플릿 엔진 (예: Jinja2)을 사용하여 사용자 데이터를 여기에 채웁니다. -->
+                    {% for user in users %}
+                    <tr data-user-id="{{ user.id }}"
+                        data-userid="{{ user.userid }}"
+                        data-nickname="{{ user.nickname }}"
+                        data-score="{{ user.score }}"
+                        data-admin="{{ user.admin }}">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.userid }}</td>
+                        <td>{{ user.nickname }}</td>
+                        <td>{{ user.registerDate }}</td>
+                        <td>{{ user.score }}</td>
+                        <td>{% if user.admin == 1 %}✅{% else %}❌{% endif %}</td>
+                        <td>
+                            <button class="btn-edit">수정</button>
+                            <button class="btn-delete">삭제</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- 사용자 생성/수정 모달 창 -->
+    <div id="adminUserModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-button">&times;</button>
+            <h3 id="modalUserFormTitle"></h3> <!-- 모달 제목: 사용자 생성/수정 -->
+            <form id="modalUserForm">
+                <div class="form-row">
+                    <label for="modalUserId">ID</label>
+                    <input type="text" id="modalUserId" name="id" disabled /> <!-- ID는 수정 불가 -->
+                </div>
+                <div class="form-row">
+                    <label for="modalUserUsername">사용자 ID</label>
+                    <input type="text" id="modalUserUsername" name="userid" required />
+                </div>
+                <div class="form-row">
+                    <label for="modalUserPassword">비밀번호 (새로 설정 시 입력)</label>
+                    <input type="password" id="modalUserPassword" name="password" />
+                </div>
+                <div class="form-row">
+                    <label for="modalUserNickname">닉네임</label>
+                    <input type="text" id="modalUserNickname" name="nickname" required />
+                </div>
+                <!-- <div class="form-row">
+                    <label for="modalUserScore">점수</label>
+                    <input type="number" id="modalUserScore" name="score" required min="0" />
+                </div> -->
+                <div class="form-row">
+                    <label for="modalUserAdmin">관리자 여부</label>
+                    <select id="modalUserAdmin" name="admin">
+                        <option value="0">일반 사용자</option>
+                        <option value="1">관리자</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript for modal interactions and dynamic behavior -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const createUserButton = document.getElementById('createUserButton');
+            const adminUserModal = document.getElementById('adminUserModal');
+            const modalCloseButtons = adminUserModal.querySelectorAll('.modal-close-button');
+            const modalUserFormTitle = document.getElementById('modalUserFormTitle');
+            const modalUserForm = document.getElementById('modalUserForm');
+            const modalUserId = document.getElementById('modalUserId');
+            const modalUserUsername = document.getElementById('modalUserUsername');
+            const modalUserPassword = document.getElementById('modalUserPassword');
+            const modalUserNickname = document.getElementById('modalUserNickname');
+            // const modalUserScore = document.getElementById('modalUserScore');
+            const modalUserAdmin = document.getElementById('modalUserAdmin');
+            const userTableBody = document.querySelector('.user-table tbody');
+
+            // 모달 열기 함수
+            function openModal(mode, userData = {}) {
+                adminUserModal.style.display = 'flex'; // 모달을 보이게 함
+                if (mode === 'create') {
+                    modalUserFormTitle.textContent = '새 사용자 생성';
+                    modalUserForm.reset(); // 폼 필드 초기화
+                    modalUserId.value = ''; // ID 필드는 비워둠
+                    modalUserId.disabled = true; // 생성 시 ID 입력 비활성화
+                    modalUserPassword.required = true; // 생성 시 비밀번호는 필수
+                } else if (mode === 'edit') {
+                    modalUserFormTitle.textContent = '사용자 수정';
+                    modalUserId.value = userData.id;
+                    modalUserId.disabled = true; // 수정 시 ID는 비활성화 (표시용)
+                    modalUserUsername.value = userData.userid;
+                    modalUserNickname.value = userData.nickname;
+                    // modalUserScore.value = userData.score;
+                    modalUserAdmin.value = userData.admin;
+                    modalUserPassword.value = ''; // 비밀번호는 수정 시 비워두고, 필요할 때만 입력
+                    modalUserPassword.required = false; // 수정 시 비밀번호는 필수가 아님
+                }
+            }
+
+            // 모달 닫기 함수
+            function closeModal() {
+                adminUserModal.style.display = 'none'; // 모달을 숨김
+            }
+
+            // '새 사용자 생성' 버튼 클릭 시
+            createUserButton.addEventListener('click', function() {
+                openModal('create');
+            });
+
+            // 모달 닫기 버튼 클릭 시
+            modalCloseButtons.forEach(button => {
+                button.addEventListener('click', closeModal);
+            });
+
+            // 모달 외부 클릭 시 닫기
+            adminUserModal.addEventListener('click', function(e) {
+                if (e.target === adminUserModal) {
+                    closeModal();
+                }
+            });
+
+            // 사용자 테이블의 수정/삭제 버튼 클릭 처리
+            userTableBody.addEventListener('click', async function(e) {
+                if (e.target.classList.contains('btn-edit')) {
+                    const row = e.target.closest('tr');
+                    const userData = {
+                        id: row.dataset.userId,
+                        userid: row.dataset.userid,
+                        nickname: row.dataset.nickname,
+                        // score: row.dataset.score,
+                        admin: row.dataset.admin
+                    };
+                    openModal('edit', userData);
+                } else if (e.target.classList.contains('btn-delete')) {
+                    const row = e.target.closest('tr');
+                    const userId = row.dataset.userId;
+                    const userUsername = row.dataset.userid;
+                    if (confirm(`정말 사용자 ID '${userUsername}' (ID: ${userId})를 삭제하시겠습니까?`)) {
+                        try {
+                            // 삭제 URL: /admin/challenge/delete/${problemId}
+                            // 메서드: GET (요청하신 대로 유지)
+                            const response = await fetch(`/admin/users/delete/${userId}`, {
+                                method: 'GET'
+                            });
+
+                            if (response.ok) {
+                                alert(`사용자 ${userId}번이 성공적으로 삭제되었습니다.`);
+                                // 삭제 후 페이지 새로고침
+                                location.reload();
+                            } else {
+                                const errorText = await response.text();
+                                alert(`문제 삭제 실패: ${errorText}`);
+                            }
+                        } catch (error) {
+                            console.error('삭제 중 오류 발생:', error);
+                            alert('문제 삭제 중 오류가 발생했습니다.');
+                        }
+                    }
+                }
+            });
+
+            // 폼 제출 처리 (생성 또는 수정)
+            modalUserForm.addEventListener('submit', async function(e) {
+                e.preventDefault(); // 기본 폼 제출 동작 방지
+
+                const formData = new FormData(modalUserForm);
+                const userData = {};
+                userData['Id'] = Number(modalUserId.value); // 유저의 id 값
+                for (let [key, value] of formData.entries()) {
+                    userData[key] = value;
+                }
+
+                const currentMode = modalUserFormTitle.textContent.includes('생성') ? 'create' : 'edit';
+                console.log(`모드: ${currentMode}, 제출 데이터:`, userData);
+
+                try {
+                    if (currentMode === 'edit') {
+                        const response = await fetch('/admin/users/edit', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(userData)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(`서버 오류: ${response.status} - ${errorData.detail || response.statusText || '알 수 없는 오류'}`);
+                        }
+
+                        alert('사용자 정보가 수정되었습니다.');
+                        location.reload(); // 성공 시 페이지 새로고침 (모달도 닫힘)
+                    } else if (currentMode === 'create') {
+                        const response = await fetch('/admin/users/create', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(userData)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(`서버 오류: ${response.status} - ${errorData.detail || response.statusText || '알 수 없는 오류'}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.error) {
+                            alert(`${result.message}`);
+                        } else {
+                            alert('사용자가 생성되었습니다.');
+                        }
+                        location.reload(); // 성공 시 페이지 새로고침 (모달도 닫힘)
+                    }
+                    
+                } catch (error) {
+                    alert(`사용자 정보 생성 및 수정 중 오류가 발생했습니다: ${error.message}`);
+                }
+
+                // API 호출 성공 후 모달을 닫고, 사용자 목록을 업데이트하거나 페이지를 새로고침합니다.
+                closeModal();
+            });
+        });
+    </script>
+</body>
+</html>

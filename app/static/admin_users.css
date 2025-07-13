@@ -1,0 +1,289 @@
+/* admin_user.css */
+
+/* 기본 바디 스타일 */
+body {
+    background: linear-gradient(to bottom, #0f172a, #000000);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 헤더 스타일 */
+.main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 40px;
+    background: #111827;
+    border-bottom: 1px solid #374151;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.main-header .logo a {
+    color: #64ffda;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.main-nav-left, .main-nav-right {
+    display: flex;
+    gap: 30px;
+}
+
+.main-nav-left a, .main-nav-right a {
+    color: #cbd5e1;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 5px 0;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.main-nav-left a:hover, .main-nav-right a:hover,
+.main-nav-left a.active, .main-nav-right a.active {
+    color: #64ffda;
+}
+
+.main-nav-right .profile-link {
+    color: #64ffda;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* 메인 콘텐츠 영역 */
+.admin-main-content {
+    flex-grow: 1;
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.page-title {
+    color: #64ffda;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* 새 사용자 생성 버튼 컨테이너 */
+.create-button-container {
+    text-align: right; /* 버튼을 오른쪽으로 정렬 */
+    margin-bottom: 20px;
+}
+
+/* 기본 버튼 스타일 */
+.btn-primary, .btn-secondary { /* btn-secondary는 현재 HTML에서 사용되지 않지만, 다른 곳에서 사용될 수 있으므로 유지 */
+    border: none;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* 주 버튼 (생성/저장) */
+.btn-primary {
+    background: #64ffda;
+    color: #1f2937;
+}
+
+.btn-primary:hover {
+    background: #52e6c8;
+    color: #000000;
+}
+
+/* 보조 버튼 (만약 사용된다면) */
+.btn-secondary {
+    background: #374151;
+    color: #cbd5e1;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+    color: #ffffff;
+}
+
+/* 사용자 목록 테이블 */
+.user-list-section {
+    overflow-x: auto; /* 테이블 내용이 넘칠 경우 스크롤 허용 */
+}
+
+.user-table {
+    width: 100%;
+    min-width: 1000px; /* 테이블 최소 너비 설정, 필요에 따라 조정 */
+    border-collapse: collapse;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    table-layout: fixed; /* 컬럼 너비 고정 */
+}
+
+.user-table thead tr {
+    background: #111827;
+}
+
+.user-table th, .user-table td {
+    padding: 8px 15px;
+    text-align: left;
+    border-bottom: 1px solid #374151;
+    color: #ffffff;
+    word-wrap: break-word; /* 긴 텍스트 자동 줄바꿈 */
+}
+
+.user-table th {
+    font-weight: bold;
+    color: #64ffda;
+    text-transform: uppercase;
+}
+
+.user-table tbody tr:hover {
+    background-color: #2a3547; /* 마우스 오버 시 배경색 변경 */
+}
+
+.user-table td button {
+    margin-right: 5px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.user-table td .btn-edit {
+    background-color: #64ffda;
+    color: #1f2937;
+    border: 1px solid #64ffda;
+}
+
+.user-table td .btn-edit:hover {
+    background-color: #52e6c8;
+    color: #000000;
+}
+
+.user-table td .btn-delete {
+    background-color: #ef4444; /* 붉은색 */
+    color: #ffffff;
+    border: 1px solid #ef4444;
+}
+
+.user-table td .btn-delete:hover {
+    background-color: #dc2626;
+    color: #ffffff;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* 반투명 검은색 배경 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* 다른 요소 위에 표시 */
+}
+
+/* 모달 콘텐츠 */
+.modal-content {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: fadeIn 0.3s ease-out; /* 모달 등장 애니메이션 */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content h3 {
+    color: #64ffda;
+    font-size: 24px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* 모달 닫기 버튼 (X) */
+.modal-close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close-button:hover {
+    color: #ef4444; /* 닫기 버튼 호버 시 붉은색으로 변경 */
+}
+
+/* 폼 행 스타일 */
+.form-row {
+    margin-bottom: 20px;
+}
+
+.form-row label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+.form-row input,
+.form-row select {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: #ffffff;
+    font-size: 14px;
+    width: calc(100% - 24px); /* 패딩 고려 */
+    transition: border-color 0.3s;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+    outline: none;
+    border-color: #64ffda;
+}
+
+.form-row select {
+    appearance: none; /* 기본 select 박스 스타일 제거 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="#cbd5e1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    padding-right: 35px; /* 화살표 공간 확보 */
+}
+
+/* 폼 액션 버튼 그룹 */
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* '저장' 버튼을 오른쪽으로 정렬 */
+    margin-top: 30px;
+}
