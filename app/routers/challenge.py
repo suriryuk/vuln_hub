@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.get('/')
 def challenge_main(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
-    current_user = user_login(UserToken)
+    current_user = user_login(UserToken, db)
     admin = is_admin(UserToken, db)
 
     # 문제 목록 조회
@@ -53,7 +53,7 @@ def create_instance(problemId: int, db: Session = Depends(get_db)):
 @router.post('/answer')
 def answer_flag(answer: Answer, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
     # 현재 유저
-    current_user = user_login(UserToken)
+    current_user = user_login(UserToken, db)
     
     # 이미 정답을 맞춘 문제인지 검사
     already_solve = db.query(UserChallenge).filter(

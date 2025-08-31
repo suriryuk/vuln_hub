@@ -41,7 +41,7 @@ def get_current_user(token: str):
     return userid
 
 # 로그인 여부 검사
-def user_login(UserToken: str):
+def user_login(UserToken: str, db: Session):
     if not UserToken:
         # return '<script>alert("Missing UserToken in cookies."); location.href="/auth/login"</script>'
         raise HTTPException(
@@ -50,7 +50,16 @@ def user_login(UserToken: str):
         )
 
     current_user = get_current_user(UserToken)
-    if current_user is None or current_user == None:
+
+    try:
+        isUser = db.query(User.userid).filter(User.userid == current_user).first()[0]
+    except Exception as e:
+        raise HTTPException(
+            status_code=302,
+            headers={'Location': '/auth/login'}
+        )
+
+    if current_user is None or current_user == None or not isUser:
         # return '<script>alert("Invalid authentication token."); location.href="/auth/login"</script>'
         raise HTTPException(
             status_code=302,

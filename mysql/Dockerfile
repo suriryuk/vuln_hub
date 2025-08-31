@@ -1,5 +1,9 @@
 FROM mysql:latest
 
+# init.sql 파일 복사
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# 한글 설정
 RUN echo "[client]" > /etc/mysql/conf.d/my.cnf && \
     echo "default-character-set=utf8mb4" >> /etc/mysql/conf.d/my.cnf && \
     echo "" >> /etc/mysql/conf.d/my.cnf && \

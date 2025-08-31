@@ -38,7 +38,7 @@ app.mount('/assets', StaticFiles(directory='static'))
 
 @app.get('/', response_class=HTMLResponse)
 def root(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
-    current_user = user_login(UserToken)
+    current_user = user_login(UserToken, db)
     admin = is_admin(UserToken, db)
 
     UserInfo = get_userinfo(current_user, db)

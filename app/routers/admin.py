@@ -82,7 +82,7 @@ templates = Jinja2Templates(directory='templates')
 @router.get('/', response_class=HTMLResponse)
 def admin_main(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
     admin = is_admin(UserToken, db)
-    current_user = user_login(UserToken)
+    current_user = user_login(UserToken, db)
     if not admin:
         return '<script>alert("You are not admin!"); location.href="/"</script>'
     
@@ -101,11 +101,11 @@ def admin_main(request: Request, UserToken: Annotated[str | None, Cookie()] = No
 @router.get('/challenge', response_class=HTMLResponse)
 def admin_challenge(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
     admin = is_admin(UserToken, db)
-    current_user = user_login(UserToken)
+    current_user = user_login(UserToken, db)
     if not admin:
         return '<script>alert("You are not admin!"); location.href="/"</script>'
     
-    current_user = user_login(UserToken)
+    # current_user = user_login(UserToken)
 
     # 문제 목록 출력을 위한 문제 목록 조회
     challs = db.query(Challenge)
@@ -209,7 +209,7 @@ def delete_challenge(problemId: int, UserToken: Annotated[str | None, Cookie()] 
 @router.get('/users', response_class=HTMLResponse)
 def users_info(request: Request, UserToken: Annotated[str | None, Cookie()] = None, db: Session = Depends(get_db)):
     admin = is_admin(UserToken, db)
-    current_user = user_login(UserToken)
+    current_user = user_login(UserToken, db)
     if not admin:
         raise HTTPException(
             status_code=401,
